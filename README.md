@@ -39,5 +39,5 @@ A comprehensive, multi-language tailoring management system designed for premium
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/samee-tailoring-system.git
+   git clone [https://github.com/naimul3103/suhaim_tailor_shop]
    ```
