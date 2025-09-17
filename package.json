@@ -1,0 +1,19 @@
+{
+  "name": "samee-tailoring-system",
+  "version": "1.0.0",
+  "description": "Professional Tailoring Order Management System",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "npx serve dist",
+    "dev": "npx serve ."
+  },
+  "devDependencies": {
+    "clean-css": "^5.3.2",
+    "html-minifier": "^4.0.0",
+    "terser": "^5.44.0"
+  },
+  "dependencies": {
+    "clean-css-cli": "^5.6.3",
+    "dotenv": "^17.2.2"
+  }
+}
