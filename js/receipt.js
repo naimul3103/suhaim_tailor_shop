@@ -1,7 +1,10 @@
+// Receipt Generation and Management - Modern Minimalist Design
+// Version 4.0 - Professional A4 Single Page Receipt
+
 function generateReceipt(data) {
   const receiptContent = document.getElementById("receipt");
 
-  // Determine current language
+  // Fix: Get current language from localStorage or body attribute
   const currentLang =
     localStorage.getItem("preferredLanguage") ||
     document.body.getAttribute("data-lang") ||
@@ -220,13 +223,137 @@ function generateMinimalMeasurements(data, lang) {
     .join("");
 }
 
-// Generate minimal design
+// Get SVG for design options
+function getDesignSVG(type, value) {
+  const svgMap = {
+    jubjurType: {
+      'Ban': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <g stroke="black" fill="none" stroke-width="1.5">
+          <path d="M40 15 L40 85 L60 85 L60 15" />
+          <line x1="40" y1="25" x2="45" y2="25" />
+          <line x1="40" y1="30" x2="42" y2="30" />
+          <line x1="40" y1="35" x2="45" y2="35" />
+          <line x1="40" y1="40" x2="42" y2="40" />
+          <line x1="40" y1="45" x2="45" y2="45" />
+          <line x1="40" y1="50" x2="42" y2="50" />
+          <line x1="40" y1="55" x2="45" y2="55" />
+          <line x1="40" y1="60" x2="42" y2="60" />
+          <line x1="40" y1="65" x2="45" y2="65" />
+          <line x1="40" y1="70" x2="42" y2="70" />
+          <line x1="40" y1="75" x2="45" y2="75" />
+          <circle cx="50" cy="30" r="2" fill="black" />
+          <circle cx="50" cy="50" r="2" fill="black" />
+          <circle cx="50" cy="70" r="2" fill="black" />
+          <line x1="55" y1="25" x2="60" y2="25" />
+          <line x1="58" y1="30" x2="60" y2="30" />
+          <line x1="55" y1="35" x2="60" y2="35" />
+          <line x1="58" y1="40" x2="60" y2="40" />
+          <line x1="55" y1="45" x2="60" y2="45" />
+          <line x1="58" y1="50" x2="60" y2="50" />
+          <line x1="55" y1="55" x2="60" y2="55" />
+          <line x1="58" y1="60" x2="60" y2="60" />
+          <line x1="55" y1="65" x2="60" y2="65" />
+          <line x1="58" y1="70" x2="60" y2="70" />
+          <line x1="55" y1="75" x2="60" y2="75" />
+          <line x1="40" y1="80" x2="60" y2="80" />
+        </g>
+      </svg>`,
+      'Makfi': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M40 15 L40 85 L60 85 L60 15 M40 25 L40 75 L60 75" stroke="black" fill="none" stroke-width="1.5" />
+      </svg>`,
+      'Ban-II': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <g stroke="black" fill="none" stroke-width="1.5">
+          <path d="M40 15 L40 75 L50 85 L60 75 L60 15" />
+          <line x1="40" y1="25" x2="45" y2="25" />
+          <line x1="40" y1="30" x2="42.5" y2="30" />
+          <line x1="40" y1="35" x2="45" y2="35" />
+          <line x1="40" y1="40" x2="42.5" y2="40" />
+          <line x1="40" y1="45" x2="45" y2="45" />
+          <line x1="40" y1="50" x2="42.5" y2="50" />
+          <line x1="40" y1="55" x2="45" y2="55" />
+          <line x1="40" y1="60" x2="42.5" y2="60" />
+          <line x1="40" y1="65" x2="45" y2="65" />
+          <circle cx="50" cy="30" r="2" fill="black" />
+          <circle cx="50" cy="47" r="2" fill="black" />
+          <circle cx="50" cy="65" r="2" fill="black" />
+          <line x1="55" y1="25" x2="60" y2="25" />
+          <line x1="57.5" y1="30" x2="60" y2="30" />
+          <line x1="55" y1="35" x2="60" y2="35" />
+          <line x1="57.5" y1="40" x2="60" y2="40" />
+          <line x1="55" y1="45" x2="60" y2="45" />
+          <line x1="57.5" y1="50" x2="60" y2="50" />
+          <line x1="55" y1="55" x2="60" y2="55" />
+          <line x1="57.5" y1="60" x2="60" y2="60" />
+          <line x1="55" y1="65" x2="60" y2="65" />
+          <line x1="40" y1="75" x2="60" y2="75" />
+        </g>
+      </svg>`,
+      'Makfi-II': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <g stroke="black" fill="none" stroke-width="1.5">
+          <path d="M40 15 L40 75 L50 85 L60 75 L60 15" />
+          <line x1="40" y1="75" x2="60" y2="75" />
+        </g>
+      </svg>`
+    },
+    pocketType: {
+      'Round-I': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M30 30 L70 30 L70 65 Q70 70 65 70 L35 70 Q30 70 30 65 Z M30 45 L50 40 L70 45 M30 50 L50 45 L70 50" stroke="black" fill="none" stroke-width="1.5" />
+      </svg>`,
+      'Round-Patch': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M30 30 L70 30 L70 65 Q70 70 65 70 L35 70 Q30 70 30 65 Z" stroke="black" fill="none" stroke-width="1.5" />
+      </svg>`,
+      'Stitch': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M30 30 L70 30 L70 65 L65 70 L35 70 L30 65 Z M30 42 L70 42 M30 48 L70 48" stroke="black" fill="none" stroke-width="1.5" />
+      </svg>`,
+      'Square': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M30 30 L70 30 L70 70 L30 70 Z M30 40 L70 40" stroke="black" fill="none" stroke-width="1.5" />
+      </svg>`
+    },
+    cuffType: {
+      'Cuff-1': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <rect x="30" y="30" width="30" height="40" fill="none" stroke="black" stroke-width="1.5" />
+        <line x1="60" y1="30" x2="80" y2="30" stroke="black" stroke-width="1.5" />
+        <line x1="60" y1="45" x2="80" y2="45" stroke="black" stroke-width="1.5" />
+        <line x1="60" y1="55" x2="80" y2="55" stroke="black" stroke-width="1.5" />
+        <line x1="60" y1="70" x2="80" y2="70" stroke="black" stroke-width="1.5" />
+      </svg>`,
+      'Cuff-2': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M30 30 L30 65 L35 70 L60 70 L60 30 Z M50 30 L80 30 M60 47 L75 47 M60 52 L75 52 M45 70 L80 70" stroke="black" fill="none" stroke-width="1.5" />
+      </svg>`
+    },
+    collarType: {
+      'Button': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <g stroke="black" fill="none" stroke-width="1.5">
+          <path d="M26 44 C 34 36, 66 36, 74 44" stroke-dasharray="4 2" />
+          <path d="M26 44 C 18 60, 34 72, 50 72 C 66 72, 82 60, 74 44" />
+          <path d="M47 72 L45 58 M54 72 L54 58" />
+          <circle cx="50" cy="66" r="2" fill="black" />
+          <path d="M26 44 C 30 28, 70 28, 74 44" />
+          <path d="M26 44 C 30 64, 70 64, 74 44" />
+        </g>
+      </svg>`,
+      'Classic': `<svg width="50" height="50" viewBox="0 0 100 100">
+        <g stroke="black" fill="none" stroke-width="1.5">
+          <path d="M26 44 C 34 36, 66 36, 74 44" stroke-dasharray="4 2" />
+          <path d="M26 44 C 18 60, 34 72, 50 72 C 66 72, 82 60, 74 44" />
+          <path d="M50 72 L50 60" />
+          <path d="M26 44 C 30 28, 70 28, 74 44" />
+          <path d="M26 44 C 30 64, 70 64, 74 44" />
+        </g>
+      </svg>`
+    }
+  };
+
+  return (svgMap[type] && svgMap[type][value]) || '';
+}
+
+// Generate minimal design with SVG images
 function generateMinimalDesign(data, lang) {
   const designs = [
-    { key: "jubjurType", value: data.jubjurType },
-    { key: "pocketType", value: data.pocketType },
-    { key: "cuffType", value: data.cuffType },
-    { key: "collarType", value: data.collarType },
+    { key: "jubjurType", value: data.jubjurType, type: "jubjurType" },
+    { key: "pocketType", value: data.pocketType, type: "pocketType" },
+    { key: "cuffType", value: data.cuffType, type: "cuffType" },
+    { key: "collarType", value: data.collarType, type: "collarType" },
     { key: "garmentStyle", value: data.garmentStyle },
     { key: "fabricType", value: data.fabricType },
     { key: "color", value: data.color },
@@ -235,14 +362,25 @@ function generateMinimalDesign(data, lang) {
   return designs
     .filter((d) => d.value && d.value !== "-")
     .map(
-      (d) => `
-      <div class="list-item">
-        <span class="item-dot">•</span>
-        <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${
-        d.value
-      }</span>
-      </div>
-    `
+      (d) => {
+        const svg = d.type ? getDesignSVG(d.type, d.value) : '';
+        if (svg) {
+          return `
+            <div class="list-item" style="display: flex; align-items: center; margin-bottom: 10px;">
+              <div style="margin-right: 10px; flex-shrink: 0;">
+                ${svg}
+              </div>
+              <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${d.value}</span>
+            </div>
+          `;
+        }
+        return `
+          <div class="list-item">
+            <span class="item-dot">•</span>
+            <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${d.value}</span>
+          </div>
+        `;
+      }
     )
     .join("");
 }
@@ -274,7 +412,7 @@ function generateMinimalAdditional(data, lang) {
   return "";
 }
 
-// getText function with language parameter
+// Updated getText function with language parameter
 function getText(key, lang = "en") {
   const texts = {
     en: {
@@ -302,7 +440,7 @@ function getText(key, lang = "en") {
       currency: "SAR",
       term1: "All details verified at order placement",
       term2: "Present receipt at collection",
-      signture: "Signature",
+      signature: "Signature",
       thankYou: "Thank you for your trust!",
       // Measurements
       length: "Length",
@@ -354,7 +492,7 @@ function getText(key, lang = "en") {
       currency: "ريال",
       term1: "تم التحقق من جميع التفاصيل",
       term2: "قدم الإيصال عند الاستلام",
-      signature: "توقيع ",
+      signature: "توقيع",
       thankYou: "شكراً لثقتكم!",
       // Measurements
       length: "الطول",
@@ -406,7 +544,7 @@ function getText(key, lang = "en") {
       currency: "রিয়াল",
       term1: "সকল বিবরণ যাচাই করা হয়েছে",
       term2: "সংগ্রহের সময় রসিদ দেখান",
-      signture: "স্বাক্ষর",
+      signature: "স্বাক্ষর",
       thankYou: "আপনার বিশ্বাসের জন্য ধন্যবাদ!",
       // Measurements
       length: "দৈর্ঘ্য",
@@ -440,7 +578,7 @@ function getText(key, lang = "en") {
     : texts["en"][key] || key;
 }
 
-//helper functions with language parameter
+// Updated helper functions with language parameter
 function getCompanyName(lang = "en") {
   const names = {
     en: "SUHAIM TAILORING",
