@@ -16,179 +16,186 @@ function generateReceipt(data) {
   const qrCodeData = `${window.location.origin}/track?id=${data.receiptId}`;
 
   const receiptHTML = `
-<div class="modern-receipt-wrapper">
-  <div class="modern-receipt-container">
-    
-    <!-- Minimalist Header -->
-    <div class="modern-header">
-      <div class="header-content">
-        <div class="brand-section">
-          <div class="brand-icon">
-            <i class="fas fa-cut"></i>
-          </div>
-          <div class="brand-text">
-            <h1 class="brand-name">${getCompanyName(currentLang)}</h1>
-            <p class="brand-tagline">${getCompanyTagline(currentLang)}</p>
-          </div>
-        </div>
-        <div class="receipt-badge">
-          <span class="badge-label">${getText("receipt", currentLang)}</span>
-          <span class="badge-number">#${data.receiptId}</span>
-        </div>
-      </div>
-      <div class="header-contact">
-        <span><i class="fas fa-phone"></i> ${getCompanyPhone()}</span>
-        <span><i class="fas fa-map-marker-alt"></i> ${getCompanyAddress(
-          currentLang
-        )}</span>
-      </div>
-    </div>
-
-    <!-- Customer & Order Info Bar -->
-    <div class="info-bar">
-      <div class="info-group">
-        <span class="info-label">${getText("customerName", currentLang)}:</span>
-        <span class="info-value">${data.customerName}</span>
-      </div>
-      <div class="info-group">
-        <span class="info-label">${getText("phone", currentLang)}:</span>
-        <span class="info-value" dir="ltr">+966${data.phoneNumber}</span>
-      </div>
-      <div class="info-group">
-        <span class="info-label">${getText("orderNo", currentLang)}:</span>
-        <span class="info-value">#${data.orderNumber}</span>
-      </div>
-      <div class="info-group">
-        <span class="info-label">${getText("date", currentLang)}:</span>
-        <span class="info-value">${formatReceiptDate(
-          data.orderDate,
-          currentLang
-        )}</span>
-      </div>
-    </div>
-
-    <!-- Main Content Grid -->
-    <div class="receipt-body">
-      
-      <!-- Left Column -->
-      <div class="column-left">
+    <div class="modern-receipt-wrapper">
+      <div class="modern-receipt-container">
         
-        <!-- Measurements -->
-        <div class="data-section">
-          <h3 class="section-heading">
-            <i class="fas fa-ruler"></i>
-            ${getText("measurements", currentLang)}
-          </h3>
-          <div class="data-grid">
-            ${generateMinimalMeasurements(data, currentLang)}
+        <!-- Minimalist Header -->
+        <div class="modern-header">
+          <div class="header-content">
+            <div class="brand-section">
+              <div class="brand-icon">
+                <i class="fas fa-cut"></i>
+              </div>
+              <div class="brand-text">
+                <h1 class="brand-name">${getCompanyName(currentLang)}</h1>
+                <p class="brand-tagline">${getCompanyTagline(currentLang)}</p>
+              </div>
+            </div>
+            <div class="receipt-badge">
+              <span class="badge-label">${getText(
+                "receipt",
+                currentLang
+              )}</span>
+              <span class="badge-number">#${data.receiptId}</span>
+            </div>
+          </div>
+          <div class="header-contact">
+            <span><i class="fas fa-phone"></i> ${getCompanyPhone()}</span>
+            <span><i class="fas fa-map-marker-alt"></i> ${getCompanyAddress(
+              currentLang
+            )}</span>
           </div>
         </div>
 
-        <!-- Design -->
-        <div class="data-section">
-          <h3 class="section-heading">
-            <i class="fas fa-palette"></i>
-            ${getText("design", currentLang)}
-          </h3>
-          <div class="data-list">
-            ${generateMinimalDesign(data, currentLang)}
+        <!-- Customer & Order Info Bar -->
+        <div class="info-bar">
+          <div class="info-group">
+            <span class="info-label">${getText(
+              "customerName",
+              currentLang
+            )}:</span>
+            <span class="info-value">${data.customerName}</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">${getText("phone", currentLang)}:</span>
+            <span class="info-value" dir="ltr">+966${data.phoneNumber}</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">${getText("orderNo", currentLang)}:</span>
+            <span class="info-value">#${data.orderNumber}</span>
+          </div>
+          <div class="info-group">
+            <span class="info-label">${getText("date", currentLang)}:</span>
+            <span class="info-value">${formatReceiptDate(
+              data.orderDate,
+              currentLang
+            )}</span>
           </div>
         </div>
 
-        <!-- Additional Options -->
-        ${generateMinimalAdditional(data, currentLang)}
-        
-        <!-- Notes -->
-        ${
-          data.notes
-            ? `
-          <div class="data-section">
-            <h3 class="section-heading">
-              <i class="fas fa-sticky-note"></i>
-              ${getText("notes", currentLang)}
-            </h3>
-            <p class="notes-text">${data.notes}</p>
-          </div>
-          `
-            : ""
-        }
-      </div>
+        <!-- Main Content Grid -->
+        <div class="receipt-body">
+          
+          <!-- Left Column -->
+          <div class="column-left">
+            
+            <!-- Measurements -->
+            <div class="data-section">
+              <h3 class="section-heading">
+                <i class="fas fa-ruler"></i>
+                ${getText("measurements", currentLang)}
+              </h3>
+              <div class="data-grid">
+                ${generateMinimalMeasurements(data, currentLang)}
+              </div>
+            </div>
 
-      <!-- Right Column -->
-      <div class="column-right">
-        
-        <!-- Delivery Info -->
-        <div class="delivery-box">
-          <div class="delivery-label">${getText("delivery", currentLang)}</div>
-          <div class="delivery-date">${formatReceiptDate(
-            data.deliveryDate,
-            currentLang
-          )}</div>
-          <div class="delivery-count">${data.thobeCount} ${getText(
+            <!-- Design -->
+            <div class="data-section">
+              <h3 class="section-heading">
+                <i class="fas fa-palette"></i>
+                ${getText("design", currentLang)}
+              </h3>
+              <div class="data-list">
+                ${generateMinimalDesign(data, currentLang)}
+              </div>
+            </div>
+
+            <!-- Additional Options -->
+            ${generateMinimalAdditional(data, currentLang)}
+            
+            <!-- Notes -->
+            ${
+              data.notes
+                ? `
+              <div class="data-section">
+                <h3 class="section-heading">
+                  <i class="fas fa-sticky-note"></i>
+                  ${getText("notes", currentLang)}
+                </h3>
+                <p class="notes-text">${data.notes}</p>
+              </div>
+              `
+                : ""
+            }
+          </div>
+
+          <!-- Right Column -->
+          <div class="column-right">
+            
+            <!-- Delivery Info -->
+            <div class="delivery-box">
+              <div class="delivery-label">${getText(
+                "delivery",
+                currentLang
+              )}</div>
+              <div class="delivery-date">${formatReceiptDate(
+                data.deliveryDate,
+                currentLang
+              )}</div>
+              <div class="delivery-count">${data.thobeCount} ${getText(
     "pcs",
     currentLang
   )}</div>
-        </div>
+            </div>
 
-        <!-- QR Code -->
-        <div class="qr-box">
-          <div id="qrcode" class="qr-code"></div>
-          <p class="qr-text">${getText("scanTrack", currentLang)}</p>
-        </div>
+            <!-- QR Code -->
+            <div class="qr-box">
+              <div id="qrcode" class="qr-code"></div>
+              <p class="qr-text">${getText("scanTrack", currentLang)}</p>
+            </div>
 
-        <!-- Payment Summary -->
-        <div class="payment-box">
-          <div class="payment-item">
-            <span>${getText("total", currentLang)}</span>
-            <span class="amount">${data.totalAmount} ${getText(
+            <!-- Payment Summary -->
+            <div class="payment-box">
+              <div class="payment-item">
+                <span>${getText("total", currentLang)}</span>
+                <span class="amount">${data.totalAmount} ${getText(
     "currency",
     currentLang
   )}</span>
-          </div>
-
-          <div class="payment-item">
-            <span>${getText("paid", currentLang)}</span>
-            <span class="amount paid">${data.paidAmount} ${getText(
+              </div>
+              <div class="payment-item">
+                <span>${getText("paid", currentLang)}</span>
+                <span class="amount paid">${data.paidAmount} ${getText(
     "currency",
     currentLang
   )}</span>
-          </div>
-
-          <div class="payment-divider"></div>
-          
-          <div class="payment-item balance">
-            <span>${getText("balance", currentLang)}</span>
-            <span class="amount">${data.remainingAmount} ${getText(
+              </div>
+              <div class="payment-divider"></div>
+              
+              <div class="payment-item balance">
+                <span>${getText("balance", currentLang)}</span>
+                <span class="amount">${data.remainingAmount} ${getText(
     "currency",
     currentLang
   )}</span>
+              </div>
+            </div>
+
+            <!-- Signature Box -->
+            <div class="signature-box">
+              <div class="signature-line"></div>
+              <p>${getText("signature", currentLang)}</p>
+            </div>
           </div>
         </div>
 
-        <!-- Signature Box -->
-        <div class="signature-box">
-          <div class="signature-line"></div>
-          <p>${getText("signature", currentLang)}</p>
+        <!-- Footer -->
+        <div class="modern-footer">
+          <div class="footer-terms">
+            ${getText("term1", currentLang)} • ${getText("term2", currentLang)}
+          </div>
+          <div class="footer-thanks">
+            ${getText("thankYou", currentLang)}
+          </div>
         </div>
       </div>
     </div>
-
-    <!-- Footer -->
-    <div class="modern-footer">
-      <div class="footer-terms">
-        ${getText("term1", currentLang)} • ${getText("term2", currentLang)}
-      </div>
-      <div class="footer-thanks">
-        ${getText("thankYou", currentLang)}
-      </div>
-    </div>
-  </div>
-</div>
   `;
 
   receiptContent.innerHTML = receiptHTML;
 
-  // Generate QR Code
+  // Generate QR Code with better error handling
   setTimeout(() => {
     generateQRCode(qrCodeData);
   }, 100);
@@ -211,11 +218,11 @@ function generateMinimalMeasurements(data, lang) {
     .filter((m) => m.value && m.value !== "-")
     .map(
       (m) => `
-      <div class="data-item">
-        <span class="item-label">${getText(m.key, lang)}</span>
-        <span class="item-value">${m.value} cm</span>
-      </div>
-    `
+        <div class="data-item">
+          <span class="item-label">${getText(m.key, lang)}</span>
+          <span class="item-value">${m.value} cm</span>
+        </div>
+      `
     )
     .join("");
 }
@@ -236,13 +243,13 @@ function generateMinimalDesign(data, lang) {
     .filter((d) => d.value && d.value !== "-")
     .map(
       (d) => `
-      <div class="list-item">
-        <span class="item-dot">•</span>
-        <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${
+        <div class="list-item">
+          <span class="item-dot">•</span>
+          <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${
         d.value
       }</span>
-      </div>
-    `
+        </div>
+      `
     )
     .join("");
 }
@@ -274,6 +281,52 @@ function generateMinimalAdditional(data, lang) {
   return "";
 }
 
+// Fixed QR Code generation with better error handling
+function generateQRCode(data) {
+  const qrcodeElement = document.getElementById("qrcode");
+  if (!qrcodeElement) {
+    console.error("QR code element not found");
+    return;
+  }
+
+  // Clear any existing content
+  qrcodeElement.innerHTML = "";
+
+  // Check if QRCode library is available
+  if (typeof QRCode === "undefined") {
+    console.error("QRCode library not loaded");
+    // Fallback to display text
+    qrcodeElement.innerHTML = `
+      <div style="padding: 10px; border: 2px solid #ddd; font-size: 10px; text-align: center;">
+        <div style="margin-bottom: 5px;">Track ID:</div>
+        <div style="font-weight: bold;">${data.substr(-8)}</div>
+      </div>
+    `;
+    return;
+  }
+
+  try {
+    // Create QR code with safe options
+    const qrcode = new QRCode(qrcodeElement, {
+      text: data,
+      width: 100,
+      height: 100,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.L : 0,
+    });
+  } catch (error) {
+    console.error("QR Code generation error:", error);
+    // Fallback display
+    qrcodeElement.innerHTML = `
+      <div style="padding: 10px; border: 2px solid #ddd; font-size: 10px; text-align: center;">
+        <div style="margin-bottom: 5px;">Track ID:</div>
+        <div style="font-weight: bold;">${data.substr(-8)}</div>
+      </div>
+    `;
+  }
+}
+
 // getText function with language parameter
 function getText(key, lang = "en") {
   const texts = {
@@ -302,7 +355,7 @@ function getText(key, lang = "en") {
       currency: "SAR",
       term1: "All details verified at order placement",
       term2: "Present receipt at collection",
-      signture: "Signature",
+      signature: "Signature",
       thankYou: "Thank you for your trust!",
       // Measurements
       length: "Length",
@@ -354,7 +407,7 @@ function getText(key, lang = "en") {
       currency: "ريال",
       term1: "تم التحقق من جميع التفاصيل",
       term2: "قدم الإيصال عند الاستلام",
-      signature: "توقيع ",
+      signature: "التوقيع",
       thankYou: "شكراً لثقتكم!",
       // Measurements
       length: "الطول",
@@ -406,7 +459,7 @@ function getText(key, lang = "en") {
       currency: "রিয়াল",
       term1: "সকল বিবরণ যাচাই করা হয়েছে",
       term2: "সংগ্রহের সময় রসিদ দেখান",
-      signture: "স্বাক্ষর",
+      signature: "স্বাক্ষর",
       thankYou: "আপনার বিশ্বাসের জন্য ধন্যবাদ!",
       // Measurements
       length: "দৈর্ঘ্য",
@@ -440,11 +493,11 @@ function getText(key, lang = "en") {
     : texts["en"][key] || key;
 }
 
-//helper functions with language parameter
+// Helper functions with language parameter
 function getCompanyName(lang = "en") {
   const names = {
     en: "SUHAIM TAILORING",
-    ar: "خياطة سامي",
+    ar: "خياطة سهيم",
     bn: "সুহাইম টেইলারিং",
   };
   return names[lang] || names.en;
@@ -485,25 +538,11 @@ function formatReceiptDate(dateString, lang = "en") {
   return `${day}/${month}/${year}`;
 }
 
-// Generate QR Code (unchanged)
-function generateQRCode(data) {
-  const qrcodeElement = document.getElementById("qrcode");
-  if (qrcodeElement) {
-    qrcodeElement.innerHTML = "";
-    try {
-      new QRCode(qrcodeElement, {
-        text: data,
-        width: 100,
-        height: 100,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.L,
-      });
-    } catch (error) {
-      console.error("QR Code error:", error);
-      qrcodeElement.innerHTML = `<div style="padding: 10px; border: 1px solid #ddd; font-size: 10px;">Track: ${data.substr(
-        -8
-      )}</div>`;
-    }
+// Ensure QR Code library is loaded
+window.addEventListener("load", function () {
+  // Check if QRCode library is available
+  if (typeof QRCode === "undefined") {
+    console.warn("QRCode library not loaded, attempting to load fallback");
+    // You can add a fallback loading mechanism here if needed
   }
-}
+});
