@@ -27,7 +27,7 @@ function generateReceipt(data) {
       <div class="header-content">
         <div class="brand-section">
           <div class="brand-icon">
-            <i class="fas fa-cut"></i>
+            ✂️
           </div>
           <div class="brand-text">
             <h1 class="brand-name">${getCompanyName(currentLang)}</h1>
@@ -40,10 +40,8 @@ function generateReceipt(data) {
         </div>
       </div>
       <div class="header-contact">
-        <span><i class="fas fa-phone"></i> ${getCompanyPhone()}</span>
-        <span><i class="fas fa-map-marker-alt"></i> ${getCompanyAddress(
-          currentLang
-        )}</span>
+        <span>📞 ${getCompanyPhone()}</span>
+        <span>📍 ${getCompanyAddress(currentLang)}</span>
       </div>
     </div>
 
@@ -79,7 +77,7 @@ function generateReceipt(data) {
         <!-- Measurements -->
         <div class="data-section">
           <h3 class="section-heading">
-            <i class="fas fa-ruler"></i>
+            📏
             ${getText("measurements", currentLang)}
           </h3>
           <div class="data-grid">
@@ -90,7 +88,7 @@ function generateReceipt(data) {
         <!-- Design -->
         <div class="data-section">
           <h3 class="section-heading">
-            <i class="fas fa-palette"></i>
+            🎨
             ${getText("design", currentLang)}
           </h3>
           <div class="data-list">
@@ -107,7 +105,7 @@ function generateReceipt(data) {
             ? `
           <div class="data-section">
             <h3 class="section-heading">
-              <i class="fas fa-sticky-note"></i>
+              📝
               ${getText("notes", currentLang)}
             </h3>
             <p class="notes-text">${data.notes}</p>
@@ -191,9 +189,9 @@ function generateReceipt(data) {
 
   receiptContent.innerHTML = receiptHTML;
 
-  // Generate QR Code
+  // Generate QR Code with better error handling
   setTimeout(() => {
-    generateQRCode(qrCodeData);
+    generateQRCodeSafe(qrCodeData);
   }, 100);
 }
 
@@ -227,7 +225,7 @@ function generateMinimalMeasurements(data, lang) {
 function getDesignSVG(type, value) {
   const svgMap = {
     jubjurType: {
-      'Ban': `<svg width="50" height="50" viewBox="0 0 100 100">
+      Ban: `<svg width="50" height="50" viewBox="0 0 100 100">
         <g stroke="black" fill="none" stroke-width="1.5">
           <path d="M40 15 L40 85 L60 85 L60 15" />
           <line x1="40" y1="25" x2="45" y2="25" />
@@ -258,10 +256,10 @@ function getDesignSVG(type, value) {
           <line x1="40" y1="80" x2="60" y2="80" />
         </g>
       </svg>`,
-      'Makfi': `<svg width="50" height="50" viewBox="0 0 100 100">
+      Makfi: `<svg width="50" height="50" viewBox="0 0 100 100">
         <path d="M40 15 L40 85 L60 85 L60 15 M40 25 L40 75 L60 75" stroke="black" fill="none" stroke-width="1.5" />
       </svg>`,
-      'Ban-II': `<svg width="50" height="50" viewBox="0 0 100 100">
+      "Ban-II": `<svg width="50" height="50" viewBox="0 0 100 100">
         <g stroke="black" fill="none" stroke-width="1.5">
           <path d="M40 15 L40 75 L50 85 L60 75 L60 15" />
           <line x1="40" y1="25" x2="45" y2="25" />
@@ -288,41 +286,44 @@ function getDesignSVG(type, value) {
           <line x1="40" y1="75" x2="60" y2="75" />
         </g>
       </svg>`,
-      'Makfi-II': `<svg width="50" height="50" viewBox="0 0 100 100">
+      "Makfi-II": `<svg width="50" height="50" viewBox="0 0 100 100">
         <g stroke="black" fill="none" stroke-width="1.5">
           <path d="M40 15 L40 75 L50 85 L60 75 L60 15" />
           <line x1="40" y1="75" x2="60" y2="75" />
         </g>
-      </svg>`
+      </svg>`,
     },
     pocketType: {
-      'Round-I': `<svg width="50" height="50" viewBox="0 0 100 100">
+      "Round-I": `<svg width="50" height="50" viewBox="0 0 100 100">
         <path d="M30 30 L70 30 L70 65 Q70 70 65 70 L35 70 Q30 70 30 65 Z M30 45 L50 40 L70 45 M30 50 L50 45 L70 50" stroke="black" fill="none" stroke-width="1.5" />
       </svg>`,
-      'Round-Patch': `<svg width="50" height="50" viewBox="0 0 100 100">
+      "Round-Patch": `<svg width="50" height="50" viewBox="0 0 100 100">
         <path d="M30 30 L70 30 L70 65 Q70 70 65 70 L35 70 Q30 70 30 65 Z" stroke="black" fill="none" stroke-width="1.5" />
       </svg>`,
-      'Stitch': `<svg width="50" height="50" viewBox="0 0 100 100">
+      Stitch: `<svg width="50" height="50" viewBox="0 0 100 100">
         <path d="M30 30 L70 30 L70 65 L65 70 L35 70 L30 65 Z M30 42 L70 42 M30 48 L70 48" stroke="black" fill="none" stroke-width="1.5" />
       </svg>`,
-      'Square': `<svg width="50" height="50" viewBox="0 0 100 100">
+      Square: `<svg width="50" height="50" viewBox="0 0 100 100">
         <path d="M30 30 L70 30 L70 70 L30 70 Z M30 40 L70 40" stroke="black" fill="none" stroke-width="1.5" />
-      </svg>`
+      </svg>`,
     },
     cuffType: {
-      'Cuff-1': `<svg width="50" height="50" viewBox="0 0 100 100">
+      "Cuff-1": `<svg width="50" height="50" viewBox="0 0 100 100">
         <rect x="30" y="30" width="30" height="40" fill="none" stroke="black" stroke-width="1.5" />
         <line x1="60" y1="30" x2="80" y2="30" stroke="black" stroke-width="1.5" />
         <line x1="60" y1="45" x2="80" y2="45" stroke="black" stroke-width="1.5" />
         <line x1="60" y1="55" x2="80" y2="55" stroke="black" stroke-width="1.5" />
         <line x1="60" y1="70" x2="80" y2="70" stroke="black" stroke-width="1.5" />
       </svg>`,
-      'Cuff-2': `<svg width="50" height="50" viewBox="0 0 100 100">
+      "Cuff-2": `<svg width="50" height="50" viewBox="0 0 100 100">
         <path d="M30 30 L30 65 L35 70 L60 70 L60 30 Z M50 30 L80 30 M60 47 L75 47 M60 52 L75 52 M45 70 L80 70" stroke="black" fill="none" stroke-width="1.5" />
-      </svg>`
+      </svg>`,
+      "Cuff-3": `<svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M30 30 v 20 Q 30 70 45 70 h 15 V30 Z m 23 0 h30 M60 47 h 15m-15 5h15M45 70h35" stroke="#000" fill="none" stroke-width="1.5"/>
+      </svg>`,
     },
     collarType: {
-      'Button': `<svg width="50" height="50" viewBox="0 0 100 100">
+      Button: `<svg width="50" height="50" viewBox="0 0 100 100">
         <g stroke="black" fill="none" stroke-width="1.5">
           <path d="M26 44 C 34 36, 66 36, 74 44" stroke-dasharray="4 2" />
           <path d="M26 44 C 18 60, 34 72, 50 72 C 66 72, 82 60, 74 44" />
@@ -332,7 +333,7 @@ function getDesignSVG(type, value) {
           <path d="M26 44 C 30 64, 70 64, 74 44" />
         </g>
       </svg>`,
-      'Classic': `<svg width="50" height="50" viewBox="0 0 100 100">
+      Classic: `<svg width="50" height="50" viewBox="0 0 100 100">
         <g stroke="black" fill="none" stroke-width="1.5">
           <path d="M26 44 C 34 36, 66 36, 74 44" stroke-dasharray="4 2" />
           <path d="M26 44 C 18 60, 34 72, 50 72 C 66 72, 82 60, 74 44" />
@@ -340,11 +341,18 @@ function getDesignSVG(type, value) {
           <path d="M26 44 C 30 28, 70 28, 74 44" />
           <path d="M26 44 C 30 64, 70 64, 74 44" />
         </g>
-      </svg>`
-    }
+      </svg>`,
+      Shirt: `<svg width="50" height="50" viewBox="305 300 50 40">
+        <g stroke="#000" stroke-width="1">
+          <path d="M-412.395-252.788c7.869 6.23 24.59 19.345 34.426 19.345s22.295.655 24.918.327c2.623-.327 22.623-6.557 30.82-21.639s-98.033-4.262-90.164 1.967zm31.311-57.394c18.033-6.23 26.558-1.312 26.232-1.638.326.326-44.264 7.867-26.232 1.638zm22.919-34.115c11.147 14.098 14.754 13.443 14.428 13.117.326.326-25.576-27.215-14.428-13.117zm699.652 645.933 6.874 11.149-10.164 22.623M315.9 302.62l-7.54 11.148 11.148 22.623" opacity="NaN" fill="#fff"/>
+          <path d="M316.061 302.947c11.803 15.41 12.131 14.426 13.77 14.754 1.64.328 11.804-15.41 11.478-15.736m-25.576.655c15.738-3.607 14.098-2.624 25.574-.657" opacity="NaN" fill="#fff"/>
+          <path d="M321.208 308.952c9.837-3.607 8.812-2.623 15.985-.656m-17.745 27.044 9.865-18.355m.272.272 8.495 17.536" opacity="NaN" fill="none"/>
+        </g>
+      </svg>`,
+    },
   };
 
-  return (svgMap[type] && svgMap[type][value]) || '';
+  return (svgMap[type] && svgMap[type][value]) || "";
 }
 
 // Generate minimal design with SVG images
@@ -361,27 +369,30 @@ function generateMinimalDesign(data, lang) {
 
   return designs
     .filter((d) => d.value && d.value !== "-")
-    .map(
-      (d) => {
-        const svg = d.type ? getDesignSVG(d.type, d.value) : '';
-        if (svg) {
-          return `
+    .map((d) => {
+      const svg = d.type ? getDesignSVG(d.type, d.value) : "";
+      if (svg) {
+        return `
             <div class="list-item" style="display: flex; align-items: center; margin-bottom: 10px;">
               <div style="margin-right: 10px; flex-shrink: 0;">
                 ${svg}
               </div>
-              <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${d.value}</span>
+              <span class="item-text"><strong>${getText(
+                d.key,
+                lang
+              )}:</strong> ${d.value}</span>
             </div>
           `;
-        }
-        return `
+      }
+      return `
           <div class="list-item">
             <span class="item-dot">•</span>
-            <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${d.value}</span>
+            <span class="item-text"><strong>${getText(d.key, lang)}:</strong> ${
+        d.value
+      }</span>
           </div>
         `;
-      }
-    )
+    })
     .join("");
 }
 
@@ -400,7 +411,7 @@ function generateMinimalAdditional(data, lang) {
     return `
       <div class="data-section">
         <h3 class="section-heading">
-          <i class="fas fa-plus-circle"></i>
+          ➕
           ${getText("additionalServices", lang)}
         </h3>
         <div class="options-pills">
@@ -547,13 +558,13 @@ function getText(key, lang = "en") {
       signature: "স্বাক্ষর",
       thankYou: "আপনার বিশ্বাসের জন্য ধন্যবাদ!",
       // Measurements
-      length: "দৈর্ঘ্য",
+      length: "লম্বাই",
       shoulder: "কাঁধ",
-      sleeveLength: "হাতা দৈর্ঘ্য",
-      sleeveWidth: "হাতা প্রস্থ",
-      chestWidth: "বুক",
+      sleeveLength: "হাতার লম্বাই",
+      sleeveWidth: "হাতার লুজ",
+      chestWidth: "বুকের প্রস্থ",
       neck: "গলা",
-      handWidth: "হাত",
+      handWidth: "হাতার মুড়ি",
       cuffLength: "কাফ",
       // Design
       jubjurType: "জুব্বুর",
@@ -582,7 +593,7 @@ function getText(key, lang = "en") {
 function getCompanyName(lang = "en") {
   const names = {
     en: "SUHAIM TAILORING",
-    ar: "خياطة سامي",
+    ar: "خياطة سهيم",
     bn: "সুহাইম টেইলারিং",
   };
   return names[lang] || names.en;
@@ -623,25 +634,65 @@ function formatReceiptDate(dateString, lang = "en") {
   return `${day}/${month}/${year}`;
 }
 
-// Generate QR Code (unchanged)
-function generateQRCode(data) {
+// Improved QR Code Generation with better error handling
+function generateQRCodeSafe(data) {
   const qrcodeElement = document.getElementById("qrcode");
-  if (qrcodeElement) {
-    qrcodeElement.innerHTML = "";
-    try {
+  if (!qrcodeElement) {
+    console.error("QR code element not found");
+    return;
+  }
+
+  qrcodeElement.innerHTML = "";
+
+  try {
+    // Check if QRCode library is available
+    if (typeof QRCode !== "undefined") {
       new QRCode(qrcodeElement, {
         text: data,
         width: 100,
         height: 100,
         colorDark: "#000000",
         colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.L,
+        correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.L : 0,
       });
-    } catch (error) {
-      console.error("QR Code error:", error);
-      qrcodeElement.innerHTML = `<div style="padding: 10px; border: 1px solid #ddd; font-size: 10px;">Track: ${data.substr(
-        -8
-      )}</div>`;
+    } else {
+      // Use fallback if library not loaded
+      console.warn("QRCode library not loaded, using fallback");
+      generateQRCodeFallback(qrcodeElement, data);
     }
+  } catch (error) {
+    console.error("QR Code generation error:", error);
+    // Use fallback on error
+    generateQRCodeFallback(qrcodeElement, data);
   }
+}
+
+// Fallback QR Code display
+function generateQRCodeFallback(element, data) {
+  const receiptId = data.split("=").pop() || data.substr(-8);
+  element.innerHTML = `
+    <div style="
+      width: 100px; 
+      height: 100px; 
+      border: 2px solid #000; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      flex-direction: column;
+      font-size: 11px; 
+      text-align: center; 
+      padding: 5px;
+      box-sizing: border-box;
+      background: white;
+    ">
+      <div style="font-size: 24px; margin-bottom: 5px;">📱</div>
+      <div style="font-weight: bold;">TRACK</div>
+      <div style="font-size: 10px; margin-top: 2px;">${receiptId}</div>
+    </div>
+  `;
+}
+
+// Backward compatibility - keep old function name
+function generateQRCode(data) {
+  generateQRCodeSafe(data);
 }
