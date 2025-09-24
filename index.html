@@ -26,21 +26,16 @@
     />
 
     <!-- QR Code Library -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script> -->
-    <!-- QR Code Library - Only use one version -->
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
-      integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <!-- Add these lines to your existing index.html -->
+    <!-- In the <head> section, add: -->
 
     <!-- Security Scripts -->
-    <!-- <script src="js/crypto.js"></script> -->
+    <script src="js/crypto.js"></script>
     <script src="js/auth.js"></script>
 
-    <!-- Main Application Scripts -->
+    <!-- Add logout button to your navigation -->
     <!-- In your header/navigation area, add: -->
     <button
       onclick="logout()"
@@ -107,6 +102,26 @@
         </div>
       </header>
 
+      <!-- Progress Indicator -->
+      <!-- <div class="progress-indicator">
+        <div class="progress-step" data-step="">
+          <div class="step-icon"><i class="fas fa-user"></i></div>
+          <span data-lang="stepCustomer">Customer</span>
+        </div>
+        <div class="progress-step" data-step="2">
+          <div class="step-icon"><i class="fas fa-ruler"></i></div>
+          <span data-lang="stepMeasurements">Measurements</span>
+        </div>
+        <div class="progress-step" data-step="3">
+          <div class="step-icon"><i class="fas fa-palette"></i></div>
+          <span data-lang="stepDesign">Design</span>
+        </div>
+        <div class="progress-step" data-step="4">
+          <div class="step-icon"><i class="fas fa-credit-card"></i></div>
+          <span data-lang="stepPayment">Payment</span>
+        </div>
+      </div> -->
+
       <!-- Main Form -->
       <form id="tailorForm" class="main-form">
         <!-- Step 1: Customer Information -->
@@ -137,7 +152,7 @@
                     name="phoneNumber"
                     required
                     class="form-control"
-                    pattern="[0-9]{9,10}"
+                    pattern="[0-9]{9,12}"
                   />
                 </div>
               </div>
@@ -206,6 +221,7 @@
               </button>
             </div>
             <div class="measurements-grid">
+              <!-- Length -->
               <div class="measurement-item">
                 <label data-lang="length">Length</label>
                 <input
@@ -216,6 +232,7 @@
                 />
                 <span class="unit">cm</span>
               </div>
+              <!-- Shoulder -->
               <div class="measurement-item">
                 <label data-lang="shoulder">Shoulder</label>
                 <input
@@ -226,6 +243,7 @@
                 />
                 <span class="unit">cm</span>
               </div>
+              <!-- Sleeve length -->
               <div class="measurement-item">
                 <label data-lang="sleeveLength">Sleeve Length</label>
                 <input
@@ -236,26 +254,7 @@
                 />
                 <span class="unit">cm</span>
               </div>
-              <div class="measurement-item">
-                <label data-lang="sleeveWidth">Sleeve Width</label>
-                <input
-                  type="number"
-                  name="sleeveWidth"
-                  step="0.5"
-                  class="form-control"
-                />
-                <span class="unit">cm</span>
-              </div>
-              <div class="measurement-item">
-                <label data-lang="chestWidth">Chest Width</label>
-                <input
-                  type="number"
-                  name="chestWidth"
-                  step="0.5"
-                  class="form-control"
-                />
-                <span class="unit">cm</span>
-              </div>
+              <!-- Neck -->
               <div class="measurement-item">
                 <label data-lang="neck">Neck</label>
                 <input
@@ -266,6 +265,29 @@
                 />
                 <span class="unit">cm</span>
               </div>
+              <!-- Chest width -->
+              <div class="measurement-item">
+                <label data-lang="chestWidth">Chest Width</label>
+                <input
+                  type="number"
+                  name="chestWidth"
+                  step="0.5"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Sleeve Width -->
+              <div class="measurement-item">
+                <label data-lang="sleeveWidth">Sleeve Width</label>
+                <input
+                  type="number"
+                  name="sleeveWidth"
+                  step="0.5"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Hand Width -->
               <div class="measurement-item">
                 <label data-lang="handWidth">Hand Width</label>
                 <input
@@ -276,6 +298,7 @@
                 />
                 <span class="unit">cm</span>
               </div>
+              <!-- Cuff Length -->
               <div class="measurement-item">
                 <label data-lang="cuffLength">Cuff Length</label>
                 <input
@@ -584,6 +607,20 @@
                       <span data-lang="cuff2">Cuff-2</span>
                     </div>
                   </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="cuffType" value="Cuff-3" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M30 30 v 20 Q 30 70 45 70 h 15 V30 Z m 23 0 h30 M60 47 h 15m-15 5h15M45 70h35"
+                          stroke="#000"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="cuff3">Cuff-3</span>
+                    </div>
+                  </label>
                 </div>
               </div>
 
@@ -630,6 +667,32 @@
                         </g>
                       </svg>
                       <span data-lang="collarClassic">Classic</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="collarType" value="Shirt" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="305 300 50 40">
+                        <g stroke="#000" stroke-width=".7">
+                          <!-- IMPORTANT: The path data below is UNCHANGED from your original code. -->
+                          <path
+                            d="M-412.395-252.788c7.869 6.23 24.59 19.345 34.426 19.345s22.295.655 24.918.327c2.623-.327 22.623-6.557 30.82-21.639s-98.033-4.262-90.164 1.967zm31.311-57.394c18.033-6.23 26.558-1.312 26.232-1.638.326.326-44.264 7.867-26.232 1.638zm22.919-34.115c11.147 14.098 14.754 13.443 14.428 13.117.326.326-25.576-27.215-14.428-13.117zm699.652 645.933 6.874 11.149-10.164 22.623M315.9 302.62l-7.54 11.148 11.148 22.623"
+                            opacity="NaN"
+                            fill="#fff"
+                          />
+                          <path
+                            d="M316.061 302.947c11.803 15.41 12.131 14.426 13.77 14.754 1.64.328 11.804-15.41 11.478-15.736m-25.576.655c15.738-3.607 14.098-2.624 25.574-.657"
+                            opacity="NaN"
+                            fill="#fff"
+                          />
+                          <path
+                            d="M321.208 308.952c9.837-3.607 8.812-2.623 15.985-.656m-17.745 27.044 9.865-18.355m.272.272 8.495 17.536"
+                            opacity="NaN"
+                            fill="none"
+                          />
+                        </g>
+                      </svg>
+                      <span data-lang="collarShirt">Shirt</span>
                     </div>
                   </label>
                 </div>
@@ -777,6 +840,25 @@
 
         <!-- Navigation Buttons -->
         <div class="form-navigation">
+          <!-- <button
+            type="button"
+            class="btn-secondary"
+            onclick="previousStep()"
+            id="prevBtn"
+            style="display: none"
+          >
+            <i class="fas fa-arrow-left"></i>
+            <span data-lang="previous">Previous</span>
+          </button>
+          <button
+            type="button"
+            class="btn-primary"
+            onclick="nextStep()"
+            id="nextBtn"
+          >
+            <span data-lang="next">Next</span>
+            <i class="fas fa-arrow-right"></i>
+          </button> -->
           <button
             type="submit"
             class="btn-success"

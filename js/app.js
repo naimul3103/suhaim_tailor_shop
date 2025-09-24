@@ -1,6 +1,8 @@
 // Main Application JavaScript
 
 // Global Variables
+let currentStep = 1;
+const totalSteps = 4;
 let formData = {};
 let currentLang = "en";
 
@@ -33,11 +35,22 @@ function initializeApp() {
 }
 
 // Generate unique order number
-function generateOrderNumber() {
+/* function generateOrderNumber() {
   const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000);
-  const orderNumber = `ORD ${timestamp}${random}`.slice(-6);
+  const random = Math.floor(Math.random() * 100);
+  const orderNumber = `ORD ${timestamp}${random}`.slice(-2);
   document.getElementById("orderNumber").textContent = orderNumber;
+} */
+function generateOrderNumber() {
+  let counter = parseInt(sessionStorage.getItem("orderCounter") || "0");
+  counter++;
+  if (counter > 9999) {
+    counter = 1;
+  }
+  sessionStorage.setItem("orderCounter", counter.toString());
+  const orderNumber = `ORD-${String(counter).padStart(4, "0")}`;
+  document.getElementById("orderNumber").textContent = orderNumber;
+  return orderNumber;
 }
 
 // Set default dates
@@ -126,6 +139,25 @@ function calculateRemaining() {
     remainingInput.style.color = "#f59e0b";
   }
 }
+
+// function updateNavigationButtons() {
+//   const prevBtn = document.getElementById("prevBtn");
+//   const nextBtn = document.getElementById("nextBtn");
+//   const submitBtn = document.getElementById("submitBtn");
+
+//   // Show/hide previous button
+
+//   // Show/hide next/submit buttons
+//   if (currentStep === totalSteps) {
+//     nextBtn.style.display = "none";
+//     submitBtn.style.display = "flex";
+//   } else {
+//     nextBtn.style.display = "flex";
+//     submitBtn.style.display = "none";
+//   }
+// }
+
+// Validate current step
 
 // Handle form submission
 async function handleFormSubmit(e) {
@@ -391,6 +423,8 @@ function newOrder() {
   scrollToTop();
 }
 
+//   addd--__-------------__--------------------
+//   --__-------------__--------------------
 // Print Receipt
 function printReceipt() {
   const receiptContent = document.getElementById("receipt");
@@ -528,62 +562,119 @@ function printReceipt() {
   win.addEventListener("load", checkResourcesAndPrint);
 }
 
-function downloadReceiptAsPDF() {
-  const receiptContent = document.getElementById("receipt");
-  if (!receiptContent) {
-    console.error("Receipt content not found");
+async function loadLastMeasurements() {
+  const phone = document.querySelector('input[name="phoneNumber"]').value;
+
+  if (!phone) {
+    showNotification(getTranslation("enterPhone"), "warning");
     return;
   }
 
-  const orderNumberElement = receiptContent.querySelector(".badge-number");
-  const orderNumber = orderNumberElement
-    ? orderNumberElement.textContent.trim()
-    : "Receipt";
+  try {
+    const response = await searchCustomer(phone);
 
-  // Create a temporary container for printing
-  const printContainer = document.createElement("div");
-  printContainer.style.position = "fixed";
-  printContainer.style.left = "-9999px";
-  printContainer.style.top = "0";
-  printContainer.style.width = "210mm";
-  printContainer.style.height = "297mm";
-  printContainer.innerHTML = receiptContent.outerHTML;
-  document.body.appendChild(printContainer);
+    if (response.status === "success" && response.orders.length > 0) {
+      const lastOrder = response.orders[0];
 
-  // Store original title
-  const originalTitle = document.title;
+      // Fill customer name and measurements (text inputs)
+      const textFields = [
+        "customerName",
+        "length",
+        "shoulder",
+        "sleeveLength",
+        "sleeveWidth",
+        "chestWidth",
+        "neck",
+        "handWidth",
+        "cuffLength",
+      ];
 
-  // Hide everything except our print container
-  const style = document.createElement("style");
-  style.id = "print-style-temp";
-  style.innerHTML = `
-    @media print {
-      body > *:not(#print-style-temp) {
-        display: none !important;
+      textFields.forEach((field) => {
+        const input = document.querySelector(`input[name="${field}"]`);
+        if (input && lastOrder[field] && lastOrder[field] !== "-") {
+          input.value = lastOrder[field];
+        }
+      });
+
+      // Fill radio button fields (jubjurType, pocketType, cuffType, collarType)
+      const radioFields = [
+        "jubjurType",
+        "pocketType",
+        "cuffType",
+        "collarType",
+      ];
+
+      radioFields.forEach((field) => {
+        if (lastOrder[field] && lastOrder[field] !== "-") {
+          const radio = document.querySelector(
+            `input[name="${field}"][value="${lastOrder[field]}"]`
+          );
+          if (radio) {
+            radio.checked = true;
+          }
+        }
+      });
+
+      // Fill select fields (garmentStyle, priority)
+      const selectFields = ["garmentStyle", "priority"];
+
+      selectFields.forEach((field) => {
+        if (lastOrder[field] && lastOrder[field] !== "-") {
+          const select = document.querySelector(`select[name="${field}"]`);
+          if (select) {
+            select.value = lastOrder[field];
+          }
+        }
+      });
+
+      // Fill checkbox fields (additional options)
+      const checkboxFields = [
+        "stitchDouble",
+        "stitchHidden",
+        "tailorTail",
+        "jacket",
+        "embroidery",
+        "specialRequest",
+      ];
+
+      checkboxFields.forEach((field) => {
+        const checkbox = document.querySelector(`input[name="${field}"]`);
+        if (checkbox) {
+          // Check if the value is "Yes", true, or 1
+          checkbox.checked =
+            lastOrder[field] === "Yes" ||
+            lastOrder[field] === true ||
+            lastOrder[field] === 1 ||
+            lastOrder[field] === "1";
+        }
+      });
+
+      // Fill other customer fields (except payment)
+      if (lastOrder.thobeCount) {
+        const thobeCountInput = document.querySelector(
+          'input[name="thobeCount"]'
+        );
+        if (thobeCountInput) {
+          thobeCountInput.value = lastOrder.thobeCount;
+        }
       }
-      body > div[style*="-9999px"] {
-        position: static !important;
-        left: 0 !important;
-        top: 0 !important;
-        width: 100% !important;
-        height: auto !important;
+
+      // Fill notes if exists
+      if (lastOrder.notes) {
+        const notesTextarea = document.querySelector('textarea[name="notes"]');
+        if (notesTextarea) {
+          notesTextarea.value = lastOrder.notes;
+        }
       }
+
+      showNotification(getTranslation("measurementsLoaded"), "success");
+    } else {
+      showNotification(getTranslation("noMeasurements"), "info");
     }
-  `;
-  document.head.appendChild(style);
-
-  // Set temporary title for filename
-  document.title = `Order-${orderNumber}`;
-
-  // Trigger print
-  window.print();
-
-  // Cleanup after print
-  setTimeout(() => {
-    document.title = originalTitle;
-    document.body.removeChild(printContainer);
-    document.head.removeChild(style);
-  }, 500);
+  } catch (error) {
+    console.error("Error loading measurements:", error);
+    showNotification(getTranslation("errorLoading"), "error");
+  }
 }
 
 //---------------------------------------------------------------------------
@@ -641,6 +732,9 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// Export functions for global use
+// window.nextStep = nextStep;
+// window.previousStep = previousStep;
 window.loadLastMeasurements = loadLastMeasurements;
 window.openWhatsApp = openWhatsApp;
 window.sendWhatsApp = sendWhatsApp;

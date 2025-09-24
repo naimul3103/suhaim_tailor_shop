@@ -23,6 +23,14 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
+    <!-- QR Code Library -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+      integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
     <style>
       /* Customer Profile Specific Styles */
       .profile-container {
@@ -72,11 +80,6 @@
 
       .profile-header-info {
         display: flex;
-        /* 
-        justify-content: space-between;
-        align-items: center; 
-        gap: 2rem; 
-        */
         flex-wrap: wrap;
         flex-direction: column;
       }
@@ -220,7 +223,6 @@
         border-radius: 0.75rem;
         border-left: 4px solid var(--primary-color);
         transition: all var(--transition-base);
-        /* justify-items: center; */
       }
 
       .measurement-card:hover {
@@ -451,7 +453,7 @@
         background: white;
         border-radius: 1rem;
         padding: 2rem;
-        max-width: 500px;
+        max-width: fit-content;
         width: 90%;
         max-height: 90vh;
         overflow-y: auto;
@@ -502,6 +504,72 @@
         background: rgba(37, 99, 235, 0.05);
       }
 
+      /* Receipt Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+      }
+
+      .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .receipt-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+        padding: 0 1rem;
+      }
+
+      .receipt-actions button {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .btn-primary {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--primary-dark);
+      }
+
+      .btn-success {
+        background: var(--success-color);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: var(--success-dark);
+      }
+
+      .btn-secondary {
+        background: var(--gray-200);
+        color: var(--gray-700);
+      }
+
+      .btn-secondary:hover {
+        background: var(--gray-300);
+      }
+
       @media (max-width: 768px) {
         .profile-header-info {
           flex-direction: column;
@@ -527,6 +595,49 @@
         .quick-actions-section {
           grid-template-columns: 1fr;
         }
+      }
+
+      /* Updated Print Styles */
+      @media print {
+        /* Hide everything except the receipt */
+        body * {
+          visibility: hidden !important;
+        }
+
+        /* Show only the receipt and its contents */
+        #receipt,
+        #receipt * {
+          visibility: visible !important;
+        }
+
+        /* Position the receipt properly for printing */
+        #receipt {
+          position: fixed !important;
+          left: 0 !important;
+          top: 0 !important;
+          width: 100% !important;
+          background: white !important;
+        }
+
+        /* Hide modal background and actions during print */
+        .modal {
+          background: transparent !important;
+        }
+
+        .receipt-actions {
+          display: none !important;
+        }
+
+        /* Ensure single page printing */
+        #receipt {
+          page-break-after: avoid !important;
+          page-break-inside: avoid !important;
+        }
+      }
+
+      /* Make sure measurements wrapper is visible in modal */
+      .measurements-print-wrapper {
+        display: block !important;
       }
     </style>
   </head>
@@ -677,7 +788,7 @@
               <div class="measurement-card">
                 <div class="measurement-label" data-lang="shoulder"
                   >Shoulder</div
-                >f
+                >
                 <div class="measurement-value">
                   <span id="m-shoulder">-</span>
                   <span class="measurement-unit">cm</span>
@@ -969,15 +1080,57 @@
       </div>
     </div>
 
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal">
+      <div class="modal-content">
+        <div class="receipt" id="receipt">
+          <!-- Receipt content will be generated dynamically -->
+        </div>
+        <div class="receipt-actions">
+          <button class="btn-primary" onclick="printReceipt()">
+            <i class="fas fa-print"></i> <span data-lang="print">Print</span>
+          </button>
+          <button class="btn-success" onclick="sendWhatsApp()">
+            <i class="fab fa-whatsapp"></i>
+            <span data-lang="sendWhatsApp">Send WhatsApp</span>
+          </button>
+          <button class="btn-secondary" onclick="closeReceiptModal()">
+            <i class="fas fa-times"></i>
+            <span data-lang="close">Close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Measurements Modal (Hidden by default) -->
+    <div id="measurementsModal" class="modal" style="display: none">
+      <div class="modal-content">
+        <div class="measurements-print-wrapper" id="measurementsPrintWrapper">
+          <!-- Measurements content will be generated dynamically -->
+        </div>
+        <div class="receipt-actions">
+          <button class="btn-primary" onclick="printMeasurementsNow()">
+            <i class="fas fa-print"></i> <span data-lang="print">Print</span>
+          </button>
+          <button class="btn-secondary" onclick="closeMeasurementsModal()">
+            <i class="fas fa-times"></i>
+            <span data-lang="close">Close</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Scripts -->
     <script src="js/language.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/receipt.js"></script>
 
     <script>
       let currentLang = "en";
       let currentCustomerData = null;
       let customerOrders = [];
       let currentUpdateOrder = null;
+      let currentViewOrder = null;
 
       // Initialize page
       document.addEventListener("DOMContentLoaded", function () {
@@ -1162,6 +1315,9 @@
 
           const statusClass = getStatusClass(order.status);
 
+          // Store order data as JSON string in data attribute
+          row.setAttribute("data-order", JSON.stringify(order));
+
           row.innerHTML = `
                     <td>${order.orderNumber || "-"}</td>
                     <td>${formatDate(order.orderDate)}</td>
@@ -1172,15 +1328,15 @@
           }</span></td>
                     <td>
                         <div class="action-buttons-group">
-                            <button class="action-btn action-btn-view" onclick="viewOrder('${
-                              order.receiptId
-                            }')">
+                            <button class="action-btn action-btn-view" onclick='viewOrder(${JSON.stringify(
+                              order
+                            ).replace(/'/g, "&apos;")})'>
                                 <i class="fas fa-eye"></i>
                                 <span>View</span>
                             </button>
-                            <button class="action-btn action-btn-print" onclick="printOrder('${
-                              order.receiptId
-                            }')">
+                            <button class="action-btn action-btn-print" onclick='printOrder(${JSON.stringify(
+                              order
+                            ).replace(/'/g, "&apos;")})'>
                                 <i class="fas fa-print"></i>
                             </button>
                             <button class="action-btn action-btn-update" onclick="openStatusModal('${
@@ -1229,17 +1385,90 @@
         document.getElementById(`${tabName}Tab`).classList.add("active");
       }
 
-      // View order
-      function viewOrder(receiptId) {
-        localStorage.setItem("viewReceiptId", receiptId);
-        window.location.href = "index.html#receipt";
+      // View order - Updated to show modal with receipt
+      function viewOrder(orderData) {
+        currentViewOrder = orderData;
+
+        // Generate receipt using the same function from receipt.js
+        if (typeof generateReceipt === "function") {
+          generateReceipt(orderData);
+          // Show the modal
+          document.getElementById("receiptModal").classList.add("show");
+        } else {
+          console.error("generateReceipt function not found");
+          showNotification("Error loading receipt", "error");
+        }
       }
 
-      // Print order
-      function printOrder(receiptId) {
-        localStorage.setItem("viewReceiptId", receiptId);
-        localStorage.setItem("autoPrint", "true");
-        window.location.href = "index.html#receipt";
+      // Print order - Fixed to properly render receipt before printing
+      function printOrder(orderData) {
+        currentViewOrder = orderData;
+
+        // Generate receipt
+        if (typeof generateReceipt === "function") {
+          // First, generate the receipt
+          generateReceipt(orderData);
+
+          // Show the modal (needed for receipt to be in DOM)
+          document.getElementById("receiptModal").classList.add("show");
+
+          // Wait for receipt to fully render, then print
+          setTimeout(() => {
+            window.print();
+            // Hide modal after printing
+            setTimeout(() => {
+              document.getElementById("receiptModal").classList.remove("show");
+            }, 100);
+          }, 500);
+        } else {
+          console.error("generateReceipt function not found");
+          showNotification("Error loading receipt", "error");
+        }
+      }
+
+      // Print receipt from modal
+      // Print receipt from modal
+      /*function printReceipt() {
+        document.body.classList.add("printing-receipt");
+        setTimeout(() => {
+          window.print();
+          setTimeout(() => {
+            document.body.classList.remove("printing-receipt");
+          }, 100);
+        }, 100);
+      }*/
+
+      function printReceipt() {
+        // Small delay to ensure receipt is fully rendered
+        setTimeout(() => {
+          window.print();
+        }, 100);
+      }
+      // Send WhatsApp from receipt modal
+      function sendWhatsApp() {
+        if (!currentViewOrder) return;
+
+        const message =
+          `Hello! Here are your order details:\n\n` +
+          `Order #: ${currentViewOrder.orderNumber}\n` +
+          `Receipt #: ${currentViewOrder.receiptId}\n` +
+          `Total: ${currentViewOrder.totalAmount} SAR\n` +
+          `Status: ${currentViewOrder.status || "New"}\n\n` +
+          `Thank you for choosing our services!`;
+
+        const phone = currentViewOrder.phoneNumber
+          ? `966${currentViewOrder.phoneNumber}`
+          : "966557485529";
+        window.open(
+          `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+          "_blank"
+        );
+      }
+
+      // Close receipt modal
+      function closeReceiptModal() {
+        document.getElementById("receiptModal").classList.remove("show");
+        currentViewOrder = null;
       }
 
       // Open status update modal
@@ -1292,7 +1521,7 @@
           // Update in DB
           await updateOrderStatus(currentUpdateOrder.receiptId, selectedStatus);
 
-          // ✅ Update row before closing modal
+          // Update row before closing modal
           const row = document
             .querySelector(
               `button.action-btn-update[onclick*="${currentUpdateOrder.receiptId}"]`
@@ -1315,6 +1544,8 @@
           showNotification("Error updating status", "error");
         }
       }
+
+      // Rest of your functions remain the same...
       // Use customer data for new order
       function useCustomerData() {
         if (currentCustomerData && customerOrders.length > 0) {
@@ -1342,8 +1573,174 @@
       }
 
       // Print measurements
+      // Updated printMeasurements function - Shows modal instead of printing directly
       function printMeasurements() {
-        window.print();
+        if (!currentCustomerData) {
+          showNotification("No customer data to print", "warning");
+          return;
+        }
+
+        // Get or create the print wrapper inside the modal
+        let printWrapper = document.getElementById("measurementsPrintWrapper");
+
+        // Get the latest measurements
+        const latestOrder = customerOrders.length > 0 ? customerOrders[0] : {};
+
+        // Generate print content
+        printWrapper.innerHTML = `
+    <div style="max-width: 800px; margin: 0 auto; font-family: 'Inter', sans-serif;">
+      <!-- Header -->
+      <div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px;">
+        <h1 style="margin: 0; color: #2563eb;">SUHAIM TAILORING</h1>
+        <p style="margin: 5px 0; color: #666;">Premium Men's Tailoring Services</p>
+        <p style="margin: 5px 0; color: #666;">📞 +966 55 748 5529 | 📍 Riyadh, KSA</p>
+      </div>
+
+      <!-- Customer Info -->
+      <div style="margin-bottom: 30px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+        <h2 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Customer Information</h2>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          <div><strong>Name:</strong> ${currentCustomerData.name || "-"}</div>
+          <div><strong>Phone:</strong> +966${
+            currentCustomerData.phone || "-"
+          }</div>
+          <div><strong>Total Orders:</strong> ${customerOrders.length}</div>
+          <div><strong>Member Since:</strong> ${formatDate(
+            currentCustomerData.firstOrderDate
+          )}</div>
+        </div>
+      </div>
+
+      <!-- Measurements -->
+      <div style="margin-bottom: 30px;">
+        <h2 style="margin: 0 0 20px 0; color: #333; font-size: 18px;">Latest Measurements</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px;">
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Length</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.length || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Shoulder</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.shoulder || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Sleeve Length</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.sleeveLength || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Sleeve Width</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.sleeveWidth || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Chest Width</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.chestWidth || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Neck</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.neck || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Hand Width</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.handWidth || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+          <div style="padding: 15px; background: #f9f9f9; border-left: 3px solid #2563eb; border-radius: 4px;">
+            <div style="font-size: 12px; color: #666; text-transform: uppercase; margin-bottom: 5px;">Cuff Length</div>
+            <div style="font-size: 20px; font-weight: bold; color: #333;">${
+              latestOrder.cuffLength || "-"
+            } <span style="font-size: 14px; color: #666;">cm</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Preferred Styles -->
+      ${
+        customerOrders.length > 0
+          ? `
+      <div style="margin-bottom: 30px; padding: 15px; background: #f5f5f5; border-radius: 8px;">
+        <h2 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Preferred Styles</h2>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+          ${
+            latestOrder.garmentStyle
+              ? `<div><strong>Garment Style:</strong> ${latestOrder.garmentStyle}</div>`
+              : ""
+          }
+          ${
+            latestOrder.jubjurType
+              ? `<div><strong>Jubjur Type:</strong> ${latestOrder.jubjurType}</div>`
+              : ""
+          }
+          ${
+            latestOrder.pocketType
+              ? `<div><strong>Pocket Type:</strong> ${latestOrder.pocketType}</div>`
+              : ""
+          }
+          ${
+            latestOrder.cuffType
+              ? `<div><strong>Cuff Type:</strong> ${latestOrder.cuffType}</div>`
+              : ""
+          }
+          ${
+            latestOrder.collarType
+              ? `<div><strong>Collar Type:</strong> ${latestOrder.collarType}</div>`
+              : ""
+          }
+          ${
+            latestOrder.fabricType
+              ? `<div><strong>Fabric Type:</strong> ${latestOrder.fabricType}</div>`
+              : ""
+          }
+        </div>
+      </div>
+      `
+          : ""
+      }
+
+      <!-- Footer -->
+      <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 12px;">
+        <p>Printed on: ${new Date().toLocaleDateString()} | Customer Profile Measurements</p>
+        <p style="margin-top: 10px;">Thank you for choosing Suhaim Tailoring!</p>
+      </div>
+    </div>
+  `;
+
+        // Show the modal (NO PRINTING YET!)
+        document.getElementById("measurementsModal").style.display = "flex";
+        document.getElementById("measurementsModal").classList.add("show");
+      }
+
+      // New function to actually print when user clicks print button in modal
+      function printMeasurementsNow() {
+        // Add print class to body
+        document.body.classList.add("printing-measurements");
+
+        // Now trigger print
+        setTimeout(() => {
+          window.print();
+          // Clean up after printing
+          setTimeout(() => {
+            document.body.classList.remove("printing-measurements");
+          }, 100);
+        }, 100);
+      }
+
+      // Function to close measurements modal
+      function closeMeasurementsModal() {
+        document.getElementById("measurementsModal").style.display = "none";
+        document.getElementById("measurementsModal").classList.remove("show");
       }
 
       // Export customer data
@@ -1377,15 +1774,6 @@
         const latestOrder = customerOrders[0];
         let message = ` Hello, Customer: ${currentCustomerData.name}\n`;
         message += `Phone: +966${currentCustomerData.phone}\n\n`;
-        /*message += `Latest Measurements:\n`;
-        message += `Length: ${latestOrder.length} cm\n`;
-        message += `Shoulder: ${latestOrder.shoulder} cm\n`;
-        message += `Sleeve Length: ${latestOrder.sleeveLength} cm\n`;
-        message += `Sleeve Width: ${latestOrder.sleeveWidth} cm\n`;
-        message += `Chest Width: ${latestOrder.chestWidth} cm\n`;
-        message += `Neck: ${latestOrder.neck} cm\n`;
-        message += `Hand Width: ${latestOrder.handWidth} cm\n`;
-        message += `Cuff Length: ${latestOrder.cuffLength} cm`;*/
         message += `\n Your Order of \nOrder Id: ${latestOrder.orderNumber} \nReceipt Id: ${latestOrder.receiptId}. \nIs ready ready for delivery. \nPlease collect it at your earliest convenience. !!! Don't forget to bring your receipt with you. \nThank you for choosing our tailoring services!`;
 
         const phone = currentCustomerData.phone;

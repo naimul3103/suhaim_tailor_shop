@@ -1,6 +1,7 @@
 (function () {
   "use strict";
 
+  // Simple obfuscation of API URL (decoded only once)
   const API_URL = (() => {
     const encoded =
       "aHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J4ZTA4YXVPMTllQU5ucGJHZVJMeVdzanlTX2NLdFdUVmZLR2FVVXBodEM4Q2s1STJGUDhCb2lkbHRKQ01mdl9ZTWsvZXhlYw==";
@@ -183,7 +184,7 @@
       await postToAPI(payload);
       cache.clear();
 
-      // Update the status badge in the table instantly
+      // ✅ Update the status badge in the table instantly
       const row = document
         .querySelector(`button.action-btn-update[onclick*="${receiptId}"]`)
         ?.closest("tr");
