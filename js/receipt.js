@@ -693,6 +693,37 @@ function generateQRCodeFallback(element, data) {
 }
 
 // Backward compatibility - keep old function name
+// function generateQRCode(data) {
+//   generateQRCodeSafe(data);
+// }
+
+// Replace the generateQRCode function with this:
 function generateQRCode(data) {
-  generateQRCodeSafe(data);
+  const qrcodeElement = document.getElementById("qrcode");
+  if (qrcodeElement) {
+    // Use QR Code API service (no library needed)
+    const qrSize = 150;
+    const qrData = encodeURIComponent(data);
+
+    // Try multiple QR code APIs for redundancy
+    const qrApis = [
+      `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${qrData}`,
+      `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${qrData}`,
+      `https://qr-generator.qrcode.studio/qr/custom?data=${qrData}&size=${qrSize}`,
+    ];
+
+    // Create QR code with fallback
+    qrcodeElement.innerHTML = `
+      <img 
+        src="${qrApis[0]}" 
+        alt="QR Code" 
+        style="width: 100px; height: 100px; border: 1px solid #ddd; padding: 5px; background: white;"
+        onerror="this.onerror=null; this.src='${
+          qrApis[1]
+        }' || this.parentElement.innerHTML='<div style=\\'width:100px;height:100px;border:2px solid #000;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:10px;text-align:center;padding:5px;\\'>📱<br>TRACK<br>${data.substr(
+      -8
+    )}</div>'"
+      />
+    `;
+  }
 }
