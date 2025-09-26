@@ -1,0 +1,83 @@
+
+/* Icon Fallbacks using Unicode */
+.fas.fa-cut::before,
+.fa-cut::before { content: "✂️"; }
+.fas.fa-phone::before,
+.fa-phone::before { content: "📞"; }
+.fas.fa-map-marker-alt::before,
+.fa-map-marker-alt::before { content: "📍"; }
+.fas.fa-ruler::before,
+.fa-ruler::before { content: "📏"; }
+.fas.fa-palette::before,
+.fa-palette::before { content: "🎨"; }
+.fas.fa-sticky-note::before,
+.fa-sticky-note::before { content: "📝"; }
+.fas.fa-plus-circle::before,
+.fa-plus-circle::before { content: "➕"; }
+.fas.fa-user::before,
+.fa-user::before { content: "👤"; }
+.fas.fa-search::before,
+.fa-search::before { content: "🔍"; }
+.fas.fa-truck::before,
+.fa-truck::before { content: "🚚"; }
+.fab.fa-whatsapp::before,
+.fa-whatsapp::before { content: "💬"; }
+.fas.fa-home::before,
+.fa-home::before { content: "🏠"; }
+.fas.fa-print::before,
+.fa-print::before { content: "🖨️"; }
+.fas.fa-save::before,
+.fa-save::before { content: "💾"; }
+.fas.fa-check::before,
+.fa-check::before { content: "✓"; }
+.fas.fa-times::before,
+.fa-times::before { content: "✕"; }
+.fas.fa-edit::before,
+.fa-edit::before { content: "✏️"; }
+.fas.fa-eye::before,
+.fa-eye::before { content: "👁️"; }
+.fas.fa-download::before,
+.fa-download::before { content: "⬇️"; }
+.fas.fa-history::before,
+.fa-history::before { content: "🔄"; }
+.fas.fa-calendar::before,
+.fa-calendar::before { content: "📅"; }
+.fas.fa-cog::before,
+.fa-cog::before { content: "⚙️"; }
+.fas.fa-user-circle::before,
+.fa-user-circle::before { content: "👤"; }
+.fas.fa-ruler-combined::before,
+.fa-ruler-combined::before { content: "📐"; }
+.fas.fa-tshirt::before,
+.fa-tshirt::before { content: "👔"; }
+.fas.fa-money-check-alt::before,
+.fa-money-check-alt::before { content: "💰"; }
+.fas.fa-arrow-left::before,
+.fa-arrow-left::before { content: "←"; }
+.fas.fa-arrow-right::before,
+.fa-arrow-right::before { content: "→"; }
+.fas.fa-users::before,
+.fa-users::before { content: "👥"; }
+.fas.fa-shopping-bag::before,
+.fa-shopping-bag::before { content: "🛍️"; }
+.fas.fa-user-cog::before,
+.fa-user-cog::before { content: "👤⚙️"; }
+.fas.fa-inbox::before,
+.fa-inbox::before { content: "📥"; }
+.fas.fa-check-circle::before,
+.fa-check-circle::before { content: "✅"; }
+.fas.fa-exclamation-circle::before,
+.fa-exclamation-circle::before { content: "⚠️"; }
+.fas.fa-exclamation-triangle::before,
+.fa-exclamation-triangle::before { content: "⚠️"; }
+.fas.fa-info-circle::before,
+.fa-info-circle::before { content: "ℹ️"; }
+
+/* Ensure icons are visible */
+[class^="fa-"], [class*=" fa-"] {
+  display: inline-block;
+  font-style: normal;
+  font-variant: normal;
+  text-rendering: auto;
+  line-height: 1;
+}

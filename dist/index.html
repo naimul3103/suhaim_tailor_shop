@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Suhaim Tailoring - Order Management System</title>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/form.css" />
+    <link rel="stylesheet" href="css/receipt.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Font Awesome Icons - Updated to latest version with integrity check -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <!-- QR Code Library - Use only one library to avoid conflicts -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+      integrity="sha512-CNgIRecGo7nphbeZ04Sc13ka07paqdeTu0WR1IM4kNcpmBAUSHSQX0FslNhTDadL4O5SAGapGt4FodqL8My0mA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <!-- Security Scripts -->
+    <script src="js/crypto.js"></script>
+    <script src="js/auth.js"></script>
+
+    <!-- Add logout button to your navigation -->
+    <button
+      onclick="logout()"
+      style="
+        position: fixed;
+        top: 26px;
+        right: 180px;
+        padding: 10px 20px;
+        background: #ef4444;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        z-index: 1000;
+      "
+    >
+      Logout
+    </button>
+  <link rel="stylesheet" href="css/icon-fallback.css">
+</head>
+  <body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">🇬🇧 English</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="bn">🇧🇩 বাংলা</option>
+      </select>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions-bar">
+      <a href="customer-profile.html" class="action-link">
+        <i class="fas fa-search"></i>
+        <span data-lang="searchCustomer">Search Customer</span>
+      </a>
+      <a href="order-status.html" class="action-link">
+        <i class="fas fa-truck"></i>
+        <span data-lang="trackOrder">Track Order</span>
+      </a>
+      <a href="#" class="action-link" onclick="openWhatsApp()">
+        <i class="fab fa-whatsapp"></i>
+        <span data-lang="whatsappSupport">WhatsApp</span>
+      </a>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container" id="formContainer">
+      <!-- Header -->
+      <header class="main-header">
+        <div class="logo-section">
+          <div class="logo">
+            <i class="fas fa-cut"></i>
+          </div>
+          <div class="header-text">
+            <h1 data-lang="businessName"
+              >Suhaim Ibrahim Muhammad Alfadhli Tailoring</h1
+            >
+            <p data-lang="businessTagline">Premium Men's Tailoring Services</p>
+          </div>
+        </div>
+        <div class="order-badge">
+          <span data-lang="orderNumber">Order #</span>
+          <strong id="orderNumber"></strong>
+        </div>
+      </header>
+
+      <!-- Main Form -->
+      <form id="tailorForm" class="main-form">
+        <!-- Step 1: Customer Information -->
+        <div class="form-step active">
+          <div class="section-card">
+            <div class="section-header">
+              <h2
+                ><i class="fas fa-user-circle"></i>
+                <span data-lang="customerInfo">Customer Information</span></h2
+              >
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label data-lang="customerName">Customer Name</label>
+                <input
+                  type="text"
+                  name="customerName"
+                  required
+                  class="form-control"
+                />
+              </div>
+              <div class="form-group">
+                <label data-lang="phoneNumber">Phone Number</label>
+                <div class="input-group">
+                  <span class="input-prefix">+966</span>
+                  <input
+                    type="tel"
+                    name="phoneNumber"
+                    required
+                    class="form-control"
+                    pattern="[0-9]{9,12}"
+                  />
+                </div>
+              </div>
+              <div class="form-group">
+                <label data-lang="orderDate">Order Date</label>
+                <input
+                  type="date"
+                  name="orderDate"
+                  required
+                  class="form-control"
+                />
+              </div>
+              <div class="form-group">
+                <label data-lang="deliveryDate">Delivery Date</label>
+                <input
+                  type="date"
+                  name="deliveryDate"
+                  required
+                  class="form-control"
+                />
+              </div>
+              <div class="form-group">
+                <label data-lang="thobeCount">Number of Thobes</label>
+                <input
+                  type="number"
+                  name="thobeCount"
+                  min="1"
+                  value="1"
+                  required
+                  class="form-control"
+                />
+              </div>
+              <div class="form-group">
+                <label data-lang="priority">Priority</label>
+                <select name="priority" class="form-control">
+                  <option value="normal" data-lang="priorityNormal"
+                    >Normal</option
+                  >
+                  <option value="urgent" data-lang="priorityUrgent"
+                    >Urgent</option
+                  >
+                  <option value="express" data-lang="priorityExpress"
+                    >Express (24h)</option
+                  >
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Measurements -->
+        <div class="form-step active" data-step="2">
+          <div class="section-card">
+            <div class="section-header">
+              <h2
+                ><i class="fas fa-ruler-combined"></i>
+                <span data-lang="measurements">Measurements</span></h2
+              >
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="loadLastMeasurements()"
+              >
+                <i class="fas fa-history"></i>
+                <span data-lang="loadPrevious">Load Previous</span>
+              </button>
+            </div>
+            <div class="measurements-grid">
+              <!-- Length -->
+              <div class="measurement-item">
+                <label data-lang="length">Length</label>
+                <input
+                  type="number"
+                  name="length"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Shoulder -->
+              <div class="measurement-item">
+                <label data-lang="shoulder">Shoulder</label>
+                <input
+                  type="number"
+                  name="shoulder"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Sleeve length -->
+              <div class="measurement-item">
+                <label data-lang="sleeveLength">Sleeve Length</label>
+                <input
+                  type="number"
+                  name="sleeveLength"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Neck -->
+              <div class="measurement-item">
+                <label data-lang="neck">Neck</label>
+                <input
+                  type="number"
+                  name="neck"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Chest width -->
+              <div class="measurement-item">
+                <label data-lang="chestWidth">Chest Width</label>
+                <input
+                  type="number"
+                  name="chestWidth"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Sleeve Width -->
+              <div class="measurement-item">
+                <label data-lang="sleeveWidth">Sleeve Width</label>
+                <input
+                  type="number"
+                  name="sleeveWidth"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Hand Width -->
+              <div class="measurement-item">
+                <label data-lang="handWidth">Hand Width</label>
+                <input
+                  type="number"
+                  name="handWidth"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+              <!-- Cuff Length -->
+              <div class="measurement-item">
+                <label data-lang="cuffLength">Cuff Length</label>
+                <input
+                  type="number"
+                  name="cuffLength"
+                  step="0.01"
+                  class="form-control"
+                />
+                <span class="unit">cm</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Design Options (Compact) -->
+        <div class="form-step active" data-step="3">
+          <div class="section-card">
+            <div class="section-header">
+              <h2
+                ><i class="fas fa-tshirt"></i>
+                <span data-lang="designOptions">Design Options</span></h2
+              >
+            </div>
+
+            <!-- Compact Design Selector -->
+            <div class="design-selector-compact">
+              <!-- Jubjur Style -->
+              <div class="design-category">
+                <h3 data-lang="jubjurStyle">Jubjur Style</h3>
+                <div class="design-options-row">
+                  <label class="design-option-compact">
+                    <input type="radio" name="jubjurType" value="Ban" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <g stroke="black" fill="none" stroke-width="1.5">
+                          <!-- Slimmer and shorter main body -->
+                          <path d="M40 15 L40 85 L60 85 L60 15" />
+
+                          <!-- Left-side graduations -->
+                          <line x1="40" y1="25" x2="45" y2="25" />
+                          <line x1="40" y1="30" x2="42" y2="30" />
+                          <line x1="40" y1="35" x2="45" y2="35" />
+                          <line x1="40" y1="40" x2="42" y2="40" />
+                          <line x1="40" y1="45" x2="45" y2="45" />
+                          <line x1="40" y1="50" x2="42" y2="50" />
+                          <line x1="40" y1="55" x2="45" y2="55" />
+                          <line x1="40" y1="60" x2="42" y2="60" />
+                          <line x1="40" y1="65" x2="45" y2="65" />
+                          <line x1="40" y1="70" x2="42" y2="70" />
+                          <line x1="40" y1="75" x2="45" y2="75" />
+
+                          <!-- Scaled-down circles -->
+                          <circle cx="50" cy="30" r="2" fill="black" />
+                          <circle cx="50" cy="50" r="2" fill="black" />
+                          <circle cx="50" cy="70" r="2" fill="black" />
+
+                          <!-- Right-side graduations -->
+                          <line x1="55" y1="25" x2="60" y2="25" />
+                          <line x1="58" y1="30" x2="60" y2="30" />
+                          <line x1="55" y1="35" x2="60" y2="35" />
+                          <line x1="58" y1="40" x2="60" y2="40" />
+                          <line x1="55" y1="45" x2="60" y2="45" />
+                          <line x1="58" y1="50" x2="60" y2="50" />
+                          <line x1="55" y1="55" x2="60" y2="55" />
+                          <line x1="58" y1="60" x2="60" y2="60" />
+                          <line x1="55" y1="65" x2="60" y2="65" />
+                          <line x1="58" y1="70" x2="60" y2="70" />
+                          <line x1="55" y1="75" x2="60" y2="75" />
+
+                          <!-- Bottom line -->
+                          <line x1="40" y1="80" x2="60" y2="80" />
+                        </g>
+                      </svg>
+                      <span data-lang="jubjurBan">Ban</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="jubjurType" value="Makfi" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M40 15 L40 85 L60 85 L60 15 M40 25 L40 75 L60 75"
+                          stroke="black"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="jubjurMakfi">Makfi</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="jubjurType" value="Ban-II" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <g stroke="black" fill="none" stroke-width="1.5">
+                          <!-- Slimmer and shorter main body -->
+                          <path d="M40 15 L40 75 L50 85 L60 75 L60 15" />
+
+                          <!-- Left-side graduations -->
+                          <line x1="40" y1="25" x2="45" y2="25" />
+                          <line x1="40" y1="30" x2="42.5" y2="30" />
+                          <line x1="40" y1="35" x2="45" y2="35" />
+                          <line x1="40" y1="40" x2="42.5" y2="40" />
+                          <line x1="40" y1="45" x2="45" y2="45" />
+                          <line x1="40" y1="50" x2="42.5" y2="50" />
+                          <line x1="40" y1="55" x2="45" y2="55" />
+                          <line x1="40" y1="60" x2="42.5" y2="60" />
+                          <line x1="40" y1="65" x2="45" y2="65" />
+
+                          <!-- Scaled-down circles -->
+                          <circle cx="50" cy="30" r="2" fill="black" />
+                          <circle cx="50" cy="47" r="2" fill="black" />
+                          <circle cx="50" cy="65" r="2" fill="black" />
+
+                          <!-- Right-side graduations -->
+                          <line x1="55" y1="25" x2="60" y2="25" />
+                          <line x1="57.5" y1="30" x2="60" y2="30" />
+                          <line x1="55" y1="35" x2="60" y2="35" />
+                          <line x1="57.5" y1="40" x2="60" y2="40" />
+                          <line x1="55" y1="45" x2="60" y2="45" />
+                          <line x1="57.5" y1="50" x2="60" y2="50" />
+                          <line x1="55" y1="55" x2="60" y2="55" />
+                          <line x1="57.5" y1="60" x2="60" y2="60" />
+                          <line x1="55" y1="65" x2="60" y2="65" />
+
+                          <!-- Bottom line -->
+                          <line x1="40" y1="75" x2="60" y2="75" />
+                        </g>
+                      </svg>
+                      <span data-lang="jubjurBan2">Ban-II</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="jubjurType" value="Makfi-II" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <g stroke="black" fill="none" stroke-width="1.5">
+                          <path d="M40 15 L40 75 L50 85 L60 75 L60 15" />
+                          <line x1="40" y1="75" x2="60" y2="75" />
+                        </g>
+                      </svg>
+                      <span data-lang="jubjurMakfi2">Makfi-II</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Pocket Style -->
+              <div class="design-category">
+                <h3 data-lang="pocketStyle">Pocket Style</h3>
+                <div class="design-options-row">
+                  <label class="design-option-compact">
+                    <input type="radio" name="pocketType" value="Round-I" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M30 30 L70 30 L70 65 Q70 70 65 70 L35 70 Q30 70 30 65 Z M30 45 L50 40 L70 45 M30 50 L50 45 L70 50"
+                          stroke="black"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="pocketRound1">Round-I</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="pocketType" value="Round-Patch" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M30 30 L70 30 L70 65 Q70 70 65 70 L35 70 Q30 70 30 65 Z"
+                          stroke="black"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="pocketRoundPatch">Patch</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="pocketType" value="Stitch" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M30 30 L70 30 L70 65 L65 70 L35 70 L30 65 Z M30 42 L70 42 M30 48 L70 48"
+                          stroke="black"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="pocketStitch">Stitch</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="pocketType" value="Square" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M30 30 L70 30 L70 70 L30 70 Z M30 40 L70 40"
+                          stroke="black"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="pocketSquare">Square</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Garment Style -->
+              <div class="design-category">
+                <h3 data-lang="garmentStyle">Garment Style</h3>
+                <div class="design-options-row">
+                  <label class="design-option-compact">
+                    <input type="radio" name="garmentStyle" value="Saudi" />
+                    <div class="option-content">
+                      <span class="flag">🇸🇦</span>
+                      <span data-lang="styleSaudi">Saudi</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="garmentStyle" value="Kuwaiti" />
+                    <div class="option-content">
+                      <span class="flag">🇰🇼</span>
+                      <span data-lang="styleKuwaiti">Kuwaiti</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="garmentStyle" value="Qatari" />
+                    <div class="option-content">
+                      <span class="flag">🇶🇦</span>
+                      <span data-lang="styleQatari">Qatari</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Cuff Style -->
+              <div class="design-category">
+                <h3 data-lang="cuffStyle">Cuff Style</h3>
+                <div class="design-options-row">
+                  <label class="design-option-compact">
+                    <input type="radio" name="cuffType" value="Cuff-1" />
+                    <div class="option-content">
+                      <svg viewBox="0 0 100 100" width="100" height="100">
+                        <!-- The rectangle is now sized and positioned to match the main body of the previous design -->
+                        <rect
+                          x="30"
+                          y="30"
+                          width="30"
+                          height="40"
+                          fill="none"
+                          stroke="black"
+                          stroke-width="1.5"
+                        />
+
+                        <!-- The lines are repositioned to align with the new rectangle size -->
+                        <line
+                          x1="60"
+                          y1="30"
+                          x2="80"
+                          y2="30"
+                          stroke="black"
+                          stroke-width="1.5"
+                        />
+                        <line
+                          x1="60"
+                          y1="45"
+                          x2="80"
+                          y2="45"
+                          stroke="black"
+                          stroke-width="1.5"
+                        />
+                        <line
+                          x1="60"
+                          y1="55"
+                          x2="80"
+                          y2="55"
+                          stroke="black"
+                          stroke-width="1.5"
+                        />
+                        <line
+                          x1="60"
+                          y1="70"
+                          x2="80"
+                          y2="70"
+                          stroke="black"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="cuff1">Cuff-1</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="cuffType" value="Cuff-2" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M30 30 L30 65 L35 70 L60 70 L60 30 Z M50 30 L80 30 M60 47 L75 47 M60 52 L75 52 M45 70 L80 70"
+                          stroke="black"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="cuff2">Cuff-2</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="cuffType" value="Cuff-3" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="0 0 100 100">
+                        <path
+                          d="M30 30 v 20 Q 30 70 45 70 h 15 V30 Z m 23 0 h30 M60 47 h 15m-15 5h15M45 70h35"
+                          stroke="#000"
+                          fill="none"
+                          stroke-width="1.5"
+                        />
+                      </svg>
+                      <span data-lang="cuff3">Cuff-3</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Collar Style -->
+              <div class="design-category">
+                <h3 data-lang="collarStyle">Collar Style</h3>
+                <div class="design-options-row">
+                  <label class="design-option-compact">
+                    <input type="radio" name="collarType" value="Button" />
+                    <div class="option-content">
+                      <svg width="120" height="100" viewBox="0 0 100 100">
+                        <g stroke="black" fill="none" stroke-width="1.5">
+                          <path
+                            d="M26 44 C 34 36, 66 36, 74 44"
+                            stroke-dasharray="4 2"
+                          />
+                          <path
+                            d="M26 44 C 18 60, 34 72, 50 72 C 66 72, 82 60, 74 44"
+                          />
+                          <path d="M47 72 L45 58 M54 72 L54 58" />
+                          <circle cx="50" cy="66" r="2" fill="black" />
+                          <path d="M26 44 C 30 28, 70 28, 74 44" />
+                          <path d="M26 44 C 30 64, 70 64, 74 44" />
+                        </g>
+                      </svg>
+                      <span data-lang="collarButton">Button</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="collarType" value="Classic" />
+                    <div class="option-content">
+                      <svg width="120" height="100" viewBox="0 0 100 100">
+                        <g stroke="black" fill="none" stroke-width="1.5">
+                          <path
+                            d="M26 44 C 34 36, 66 36, 74 44"
+                            stroke-dasharray="4 2"
+                          />
+                          <path
+                            d="M26 44 C 18 60, 34 72, 50 72 C 66 72, 82 60, 74 44"
+                          />
+                          <path d="M50 72 L50 60 " />
+                          <path d="M26 44 C 30 28, 70 28, 74 44" />
+                          <path d="M26 44 C 30 64, 70 64, 74 44" />
+                        </g>
+                      </svg>
+                      <span data-lang="collarClassic">Classic</span>
+                    </div>
+                  </label>
+                  <label class="design-option-compact">
+                    <input type="radio" name="collarType" value="Shirt" />
+                    <div class="option-content">
+                      <svg width="100" height="100" viewBox="305 300 50 40">
+                        <g stroke="#000" stroke-width=".7">
+                          <!-- IMPORTANT: The path data below is UNCHANGED from your original code. -->
+                          <path
+                            d="M-412.395-252.788c7.869 6.23 24.59 19.345 34.426 19.345s22.295.655 24.918.327c2.623-.327 22.623-6.557 30.82-21.639s-98.033-4.262-90.0564 1.967zm31.311-57.394c18.033-6.23 26.558-1.312 26.232-1.638.326.326-44.264 7.867-26.232 1.638zm22.919-34.115c11.147 14.098 14.754 13.443 14.428 13.117.326.326-25.576-27.215-14.428-13.117zm699.652 645.933 6.874 11.149-10.0564 22.623M315.9 302.62l-7.54 11.148 11.148 22.623"
+                            opacity="NaN"
+                            fill="#fff"
+                          />
+                          <path
+                            d="M316.061 302.947c11.803 15.41 12.131 14.426 13.77 14.754 1.64.328 11.804-15.41 11.478-15.736m-25.576.655c15.738-3.607 14.098-2.624 25.574-.657"
+                            opacity="NaN"
+                            fill="#fff"
+                          />
+                          <path
+                            d="M321.208 308.952c9.837-3.607 8.812-2.623 15.985-.656m-17.745 27.044 9.865-18.355m.272.272 8.495 17.536"
+                            opacity="NaN"
+                            fill="none"
+                          />
+                        </g>
+                      </svg>
+                      <span data-lang="collarShirt">Shirt</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Additional Options -->
+              <div class="design-category">
+                <h3 data-lang="additionalOptions">Additional Options</h3>
+                <div class="checkbox-grid">
+                  <label class="checkbox-option">
+                    <input type="checkbox" name="stitchDouble" />
+                    <span data-lang="doubleStitch">Double Stitch</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" name="stitchHidden" />
+                    <span data-lang="hiddenStitch">Hidden Stitch</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" name="tailorTail" />
+                    <span data-lang="tailorTail">Tailor's Tail</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" name="jacket" />
+                    <span data-lang="jacket">Jacket</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" name="embroidery" />
+                    <span data-lang="embroidery">Embroidery</span>
+                  </label>
+                  <label class="checkbox-option">
+                    <input type="checkbox" name="specialRequest" />
+                    <span data-lang="specialRequest">Special Request</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Fabric Details -->
+              <div class="design-category design-footer">
+                <h3 data-lang="fabricDetails">Fabric Details</h3>
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label data-lang="fabricType">Fabric Type</label>
+                    <input
+                      type="text"
+                      name="fabricType"
+                      class="form-control"
+                      placeholder="e.g., Japanese Cotton"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label data-lang="color">Color</label>
+                    <input
+                      type="text"
+                      name="color"
+                      class="form-control"
+                      placeholder="e.g., White"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label data-lang="plain">Plain</label>
+                    <select name="plain" class="form-control">
+                      <option value="" data-lang="selectOption">Select</option>
+                      <option value="Yes" data-lang="yes">Yes</option>
+                      <option value="No" data-lang="no">No</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Payment & Notes -->
+        <div class="form-step active" data-step="4">
+          <div class="section-card">
+            <div class="section-header">
+              <h2
+                ><i class="fas fa-money-check-alt"></i>
+                <span data-lang="paymentDetails">Payment Details</span></h2
+              >
+            </div>
+
+            <div class="payment-section">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label data-lang="totalAmount">Total Amount</label>
+                  <div class="input-group">
+                    <input
+                      type="number"
+                      name="totalAmount"
+                      id="totalAmount"
+                      required
+                      step="0.01"
+                      class="form-control"
+                    />
+                    <span class="input-suffix">SAR</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label data-lang="paidAmount">Paid Amount</label>
+                  <div class="input-group">
+                    <input
+                      type="number"
+                      name="paidAmount"
+                      id="paidAmount"
+                      step="0.01"
+                      class="form-control"
+                    />
+                    <span class="input-suffix">SAR</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label data-lang="remainingAmount">Remaining Amount</label>
+                  <div class="input-group">
+                    <input
+                      type="number"
+                      name="remainingAmount"
+                      id="remainingAmount"
+                      readonly
+                      class="form-control"
+                    />
+                    <span class="input-suffix">SAR</span>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label data-lang="paymentMethod">Payment Method</label>
+                  <select name="paymentMethod" class="form-control">
+                    <option value="cash" data-lang="cash">Cash</option>
+                    <option value="card" data-lang="card">Card</option>
+                    <option value="transfer" data-lang="transfer"
+                      >Bank Transfer</option
+                    >
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label data-lang="notes">Notes</label>
+                <textarea name="notes" rows="3" class="form-control"></textarea>
+              </div>
+            </div>
+          </div>
+          <div> </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="form-navigation">
+          <button
+            type="submit"
+            class="btn-success"
+            id="submitBtn"
+            style="display: block"
+          >
+            <i class="fas fa-save"></i>
+            <span data-lang="saveAndPrint">Save & Print Receipt</span>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Receipt Modal -->
+    <div id="receiptModal" class="modal">
+      <div class="modal-content">
+        <div class="receipt" id="receipt">
+          <!-- Receipt content will be generated dynamically -->
+        </div>
+        <div class="receipt-actions">
+          <button class="btn-primary" onclick="printReceipt()">
+            <i class="fas fa-print"></i> <span data-lang="print">Print</span>
+          </button>
+          <button class="btn-success" onclick="sendWhatsApp()">
+            <i class="fab fa-whatsapp"></i>
+            <span data-lang="sendWhatsApp">Send WhatsApp</span>
+          </button>
+          <button class="btn-secondary" onclick="newOrder()">
+            <i class="fas fa-plus"></i>
+            <span data-lang="newOrder">New Order</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="js/language.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/receipt.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/optimized-api.js"></script>
+    <script src="js/performance-optimizer.js"></script>
+  </body>
+</html>

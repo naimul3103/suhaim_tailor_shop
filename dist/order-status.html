@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Status Tracking - Samee Tailoring</title>
+
+    <!-- External CSS -->
+    <link rel="stylesheet" href="css/main.css" />
+    <link rel="stylesheet" href="css/form.css" />
+    <link rel="stylesheet" href="css/receipt.css" />
+    <link rel="stylesheet" href="css/responsive.css" />
+
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+Arabic:wght@400;600;700&family=Noto+Sans+Bengali:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+
+    <style>
+      /* Order Status Specific Styles */
+      .tracking-container {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .tracking-header {
+        text-align: center;
+        padding: 2rem;
+        background: white;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .tracking-search {
+        max-width: 500px;
+        margin: 2rem auto;
+      }
+
+      .tracking-search-box {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .tracking-search-box input {
+        flex: 1;
+      }
+
+      .tracking-result {
+        display: none;
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: var(--shadow-lg);
+        animation: fadeIn 0.5s ease;
+      }
+
+      .tracking-result.show {
+        display: block;
+      }
+
+      .status-timeline {
+        position: relative;
+        padding: 2rem 0;
+      }
+
+      .timeline-line {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--gray-300);
+        transform: translateX(-50%);
+      }
+
+      .timeline-progress {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 2px;
+        background: var(--primary-color);
+        transform: translateX(-50%);
+        transition: height 0.5s ease;
+      }
+
+      .timeline-item {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-bottom: 3rem;
+      }
+
+      .timeline-item:nth-child(odd) {
+        flex-direction: row-reverse;
+      }
+
+      .timeline-content {
+        flex: 1;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: 0.75rem;
+        margin: 0 2rem;
+      }
+
+      .timeline-item.active .timeline-content {
+        background: linear-gradient(
+          135deg,
+          rgba(37, 99, 235, 0.1),
+          rgba(37, 99, 235, 0.05)
+        );
+        border: 2px solid var(--primary-color);
+      }
+
+      .timeline-icon {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+        height: 50px;
+        background: white;
+        border: 3px solid var(--gray-300);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2;
+      }
+
+      .timeline-item.completed .timeline-icon {
+        background: var(--success-color);
+        border-color: var(--success-color);
+        color: white;
+      }
+
+      .timeline-item.active .timeline-icon {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+        }
+      }
+
+      .timeline-date {
+        font-size: 0.875rem;
+        color: var(--gray-600);
+        margin-top: 0.5rem;
+      }
+
+      .order-details-card {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: var(--shadow-md);
+      }
+
+      .order-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+      }
+
+      .order-info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 1rem;
+        background: var(--gray-50);
+        border-radius: 0.5rem;
+      }
+
+      .order-info-item label {
+        font-weight: 600;
+        color: var(--gray-600);
+      }
+
+      .order-info-item span {
+        color: var(--gray-900);
+      }
+
+      .estimated-delivery {
+        text-align: center;
+        padding: 2rem;
+        background: linear-gradient(
+          135deg,
+          var(--primary-light),
+          var(--primary-color)
+        );
+        color: white;
+        border-radius: 1rem;
+        margin-top: 2rem;
+      }
+
+      .estimated-delivery h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      .estimated-delivery .date {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+
+      .notification-options {
+        background: white;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-top: 2rem;
+        box-shadow: var(--shadow-md);
+      }
+
+      .notification-option {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem;
+        border-bottom: 1px solid var(--gray-200);
+      }
+
+      .notification-option:last-child {
+        border-bottom: none;
+      }
+
+      .toggle-switch {
+        position: relative;
+        width: 50px;
+        height: 25px;
+      }
+
+      .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: var(--gray-300);
+        transition: 0.4s;
+        border-radius: 25px;
+      }
+
+      .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 4px;
+        bottom: 3.5px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+      }
+
+      input:checked + .toggle-slider {
+        background-color: var(--primary-color);
+      }
+
+      input:checked + .toggle-slider:before {
+        transform: translateX(24px);
+      }
+
+      @media (max-width: 768px) {
+        .timeline-line,
+        .timeline-progress {
+          left: 30px;
+        }
+
+        .timeline-item,
+        .timeline-item:nth-child(odd) {
+          flex-direction: row;
+        }
+
+        .timeline-icon {
+          left: 30px;
+        }
+
+        .timeline-content {
+          margin-left: 80px;
+          margin-right: 0;
+        }
+      }
+    </style>
+  <link rel="stylesheet" href="css/icon-fallback.css">
+</head>
+  <body>
+    <!-- Language Selector -->
+    <div class="language-selector">
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">🇬🇧 English</option>
+        <option value="ar">🇸🇦 العربية</option>
+        <option value="bn">🇧🇩 বাংলা</option>
+      </select>
+    </div>
+
+    <!-- Quick Actions Bar -->
+    <div class="quick-actions-bar">
+      <a href="index.html" class="action-link">
+        <i class="fas fa-home"></i>
+        <span data-lang="home">Home</span>
+      </a>
+      <a href="customer-profile.html" class="action-link">
+        <i class="fas fa-user"></i>
+        <span data-lang="profile">Profile</span>
+      </a>
+      <a href="#" class="action-link" onclick="openWhatsApp()">
+        <i class="fab fa-whatsapp"></i>
+        <span data-lang="whatsappSupport">WhatsApp</span>
+      </a>
+    </div>
+
+    <div class="container tracking-container">
+      <!-- Tracking Header -->
+      <div class="tracking-header">
+        <h1>
+          <i class="fas fa-truck"></i>
+          <span data-lang="trackYourOrder">Track Your Order</span>
+        </h1>
+        <p data-lang="trackDescription"
+          >Enter your receipt ID or phone number to track your order status</p
+        >
+      </div>
+
+      <!-- Search Section -->
+      <div class="tracking-search">
+        <div class="tracking-search-box">
+          <input
+            type="text"
+            id="trackingInput"
+            class="form-control"
+            placeholder="Enter Receipt ID or Phone Number"
+            data-placeholder-key="enterTrackingInfo"
+          />
+          <button class="btn-primary" onclick="trackOrder()">
+            <i class="fas fa-search"></i>
+            <span data-lang="search">Search</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tracking Result -->
+      <div class="tracking-result" id="trackingResult">
+        <!-- Order Status Timeline -->
+        <div class="status-timeline">
+          <div class="timeline-line"></div>
+          <div class="timeline-progress" id="timelineProgress"></div>
+
+          <div class="timeline-item" data-status="new">
+            <div class="timeline-icon">
+              <i class="fas fa-clipboard-list"></i>
+            </div>
+            <div class="timeline-content">
+              <h3 data-lang="statusNew">Order Placed</h3>
+              <p data-lang="statusNewDesc">Your order has been received</p>
+              <div class="timeline-date" id="dateNew">-</div>
+            </div>
+          </div>
+
+          <div class="timeline-item" data-status="progress">
+            <div class="timeline-icon">
+              <i class="fas fa-cut"></i>
+            </div>
+            <div class="timeline-content">
+              <h3 data-lang="statusProgress">In Progress</h3>
+              <p data-lang="statusProgressDesc"
+                >Your garment is being tailored</p
+              >
+              <div class="timeline-date" id="dateProgress">-</div>
+            </div>
+          </div>
+
+          <div class="timeline-item" data-status="ready">
+            <div class="timeline-icon">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="timeline-content">
+              <h3 data-lang="statusReady">Ready</h3>
+              <p data-lang="statusReadyDesc">Your order is ready for pickup</p>
+              <div class="timeline-date" id="dateReady">-</div>
+            </div>
+          </div>
+
+          <div class="timeline-item" data-status="delivered">
+            <div class="timeline-icon">
+              <i class="fas fa-box-open"></i>
+            </div>
+            <div class="timeline-content">
+              <h3 data-lang="statusDelivered">Delivered</h3>
+              <p data-lang="statusDeliveredDesc">Order has been delivered</p>
+              <div class="timeline-date" id="dateDelivered">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estimated Delivery -->
+        <div class="estimated-delivery">
+          <h3 data-lang="estimatedDelivery">Estimated Delivery</h3>
+          <div class="date" id="estimatedDate">-</div>
+        </div>
+
+        <!-- Order Details -->
+        <div class="order-details-card">
+          <h3>
+            <i class="fas fa-info-circle"></i>
+            <span data-lang="orderDetails">Order Details</span>
+          </h3>
+          <div class="order-info-grid">
+            <div class="order-info-item">
+              <label data-lang="orderNumber">Order Number</label>
+              <span id="trackOrderNumber">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="receiptId">Receipt ID</label>
+              <span id="trackReceiptId">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="customerName">Customer Name</label>
+              <span id="trackCustomerName">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="phoneNumber">Phone Number</label>
+              <span id="trackPhoneNumber">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="orderDate">Order Date</label>
+              <span id="trackOrderDate">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="deliveryDate">Delivery Date</label>
+              <span id="trackDeliveryDate">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="thobeCount">Number of Thobes</label>
+              <span id="trackThobeCount">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="totalAmount">Total Amount</label>
+              <span id="trackTotalAmount">-</span>
+            </div>
+            <div class="order-info-item">
+              <label data-lang="remainingAmount">Remaining Amount</label>
+              <span
+                id="trackRemainingAmount"
+                style="color: var(--danger-color); font-weight: bold"
+                >-</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Notification Options -->
+        <div class="notification-options">
+          <h3>
+            <i class="fas fa-bell"></i>
+            <span data-lang="notificationSettings">Notification Settings</span>
+          </h3>
+
+          <div class="notification-option">
+            <div>
+              <strong data-lang="smsNotifications">SMS Notifications</strong>
+              <p
+                style="color: var(--gray-600); font-size: 0.875rem"
+                data-lang="smsDesc"
+              >
+                Receive updates via SMS
+              </p>
+            </div>
+            <label class="toggle-switch">
+              <input
+                type="checkbox"
+                id="smsToggle"
+                onchange="updateNotificationSettings()"
+              />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <div class="notification-option">
+            <div>
+              <strong data-lang="whatsappNotifications"
+                >WhatsApp Notifications</strong
+              >
+              <p
+                style="color: var(--gray-600); font-size: 0.875rem"
+                data-lang="whatsappDesc"
+              >
+                Receive updates via WhatsApp
+              </p>
+            </div>
+            <label class="toggle-switch">
+              <input
+                type="checkbox"
+                id="whatsappToggle"
+                checked
+                onchange="updateNotificationSettings()"
+              />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div
+          style="
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+          "
+        >
+          <button class="btn-primary" onclick="downloadReceipt()">
+            <i class="fas fa-download"></i>
+            <span data-lang="downloadReceipt">Download Receipt</span>
+          </button>
+          <button class="btn-success" onclick="contactSupport()">
+            <i class="fab fa-whatsapp"></i>
+            <span data-lang="contactSupport">Contact Support</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/language.js"></script>
+    <script src="js/api.js"></script>
+
+    <script>
+      let currentOrderData = null;
+      let currentLang = "en";
+
+      // Initialize page
+      document.addEventListener("DOMContentLoaded", function () {
+        // Set language
+        const savedLang = localStorage.getItem("preferredLanguage") || "en";
+        changeLanguage(savedLang);
+
+        // Check URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const receiptId = urlParams.get("id");
+        if (receiptId) {
+          document.getElementById("trackingInput").value = receiptId;
+          trackOrder();
+        }
+      });
+
+      // Track order
+      async function trackOrder() {
+        const input = document.getElementById("trackingInput").value.trim();
+
+        if (!input) {
+          showNotification(
+            "Please enter Receipt ID or Phone Number",
+            "warning"
+          );
+          return;
+        }
+
+        try {
+          showNotification("Searching for order...", "info");
+
+          let response;
+          // Check if input is receipt ID or phone number
+          if (input.startsWith("RCP") || input.startsWith("R")) {
+            response = await getOrderByReceiptId(input);
+          } else {
+            // Search by phone
+            response = await searchCustomer(input);
+            if (response.status === "success" && response.orders.length > 0) {
+              // Get the latest order
+              response = {
+                status: "success",
+                order: response.orders[0],
+              };
+            }
+          }
+
+          if (response.status === "success" && response.order) {
+            currentOrderData = response.order;
+            displayOrderStatus(response.order);
+            document.getElementById("trackingResult").classList.add("show");
+          } else {
+            showNotification("No order found with this information", "error");
+          }
+        } catch (error) {
+          console.error("Error tracking order:", error);
+          showNotification("Error tracking order. Please try again.", "error");
+        }
+      }
+
+      // Display order status
+      function displayOrderStatus(order) {
+        // Update order details
+        document.getElementById("trackOrderNumber").textContent =
+          order.orderNumber || "-";
+        document.getElementById("trackReceiptId").textContent =
+          order.receiptId || "-";
+        document.getElementById("trackCustomerName").textContent =
+          order.customerName || "-";
+        document.getElementById("trackPhoneNumber").textContent =
+          order.phoneNumber || "-";
+        document.getElementById("trackOrderDate").textContent = formatDate(
+          order.orderDate
+        );
+        document.getElementById("trackDeliveryDate").textContent = formatDate(
+          order.deliveryDate
+        );
+        document.getElementById("trackThobeCount").textContent =
+          order.thobeCount || "-";
+        document.getElementById("trackTotalAmount").textContent = `${
+          order.totalAmount
+        } ${getCurrency()}`;
+        document.getElementById("trackRemainingAmount").textContent = `${
+          order.remainingAmount
+        } ${getCurrency()}`;
+
+        // Update estimated delivery
+        document.getElementById("estimatedDate").textContent = formatDate(
+          order.deliveryDate
+        );
+
+        // Update timeline based on status
+        const status = getOrderStatusKey(order.status);
+        updateTimeline(status);
+
+        // Load notification preferences
+        loadNotificationSettings(order.receiptId);
+      }
+
+      // Get order status key
+      function getOrderStatusKey(statusText) {
+        if (!statusText) return "new";
+
+        const statusLower = statusText.toLowerCase();
+        if (statusLower.includes("progress") || statusLower.includes("قيد"))
+          return "progress";
+        if (statusLower.includes("ready") || statusLower.includes("جاهز"))
+          return "ready";
+        if (statusLower.includes("delivered") || statusLower.includes("تسليم"))
+          return "delivered";
+        if (statusLower.includes("cancelled") || statusLower.includes("ملغى"))
+          return "cancelled";
+        return "new";
+      }
+
+      // Update timeline
+      function updateTimeline(currentStatus) {
+        const statuses = ["new", "progress", "ready", "delivered"];
+        const currentIndex = statuses.indexOf(currentStatus);
+
+        // Reset all items
+        document.querySelectorAll(".timeline-item").forEach((item) => {
+          item.classList.remove("completed", "active");
+        });
+
+        // Set completed and active states
+        statuses.forEach((status, index) => {
+          const item = document.querySelector(
+            `.timeline-item[data-status="${status}"]`
+          );
+          if (index < currentIndex) {
+            item.classList.add("completed");
+            // Add sample date
+            document.getElementById(
+              `date${capitalizeFirst(status)}`
+            ).textContent = formatDate(
+              new Date(Date.now() - (statuses.length - index) * 86400000)
+            );
+          } else if (index === currentIndex) {
+            item.classList.add("active");
+            document.getElementById(
+              `date${capitalizeFirst(status)}`
+            ).textContent = formatDate(new Date());
+          }
+        });
+
+        // Update progress bar
+        const progressBar = document.getElementById("timelineProgress");
+        const progressHeight = (currentIndex / (statuses.length - 1)) * 100;
+        progressBar.style.height = `${progressHeight}%`;
+      }
+
+      // Load notification settings
+      function loadNotificationSettings(receiptId) {
+        const settings = localStorage.getItem(`notifications_${receiptId}`);
+        if (settings) {
+          const parsed = JSON.parse(settings);
+          document.getElementById("smsToggle").checked = parsed.sms || false;
+          document.getElementById("whatsappToggle").checked =
+            parsed.whatsapp !== false;
+        }
+      }
+
+      // Update notification settings
+      function updateNotificationSettings() {
+        if (!currentOrderData) return;
+
+        const settings = {
+          sms: document.getElementById("smsToggle").checked,
+          whatsapp: document.getElementById("whatsappToggle").checked,
+        };
+
+        localStorage.setItem(
+          `notifications_${currentOrderData.receiptId}`,
+          JSON.stringify(settings)
+        );
+        showNotification("Notification settings updated", "success");
+      }
+
+      // Download receipt
+      function downloadReceipt() {
+        if (!currentOrderData) return;
+
+        // Redirect to main page with receipt ID to show and print
+        localStorage.setItem("viewReceiptId", currentOrderData.receiptId);
+        localStorage.setItem("autoPrint", "true");
+        window.location.href = "index.html#receipt";
+      }
+
+      // Contact support
+      function contactSupport() {
+        const phone = `+966${currentOrderData.phoneNumber}`;
+        let message = "Hello, I need help with my order.";
+
+        if (currentOrderData) {
+          message = `Hello,Your Order: \nReceipt ID: ${currentOrderData.receiptId}\nOrder Number: ${currentOrderData.orderNumber} is ${currentOrderData.status}.\n`;
+        }
+
+        window.open(
+          `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+          "_blank"
+        );
+      }
+
+      // Open WhatsApp
+      function openWhatsApp() {
+        const phone = "966557485529";
+        const message = encodeURIComponent(
+          "Hello, I would like to inquire about tailoring services."
+        );
+        window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+      }
+
+      // Format date
+      function formatDate(dateString) {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        const options = { year: "numeric", month: "long", day: "numeric" };
+
+        if (currentLang === "ar") {
+          return date.toLocaleDateString("ar-SA", options);
+        } else if (currentLang === "bn") {
+          return date.toLocaleDateString("bn-BD", options);
+        } else {
+          return date.toLocaleDateString("en-US", options);
+        }
+      }
+
+      // Get currency
+      function getCurrency() {
+        return currentLang === "ar"
+          ? "ريال"
+          : currentLang === "bn"
+          ? "রিয়াল"
+          : "SAR";
+      }
+
+      // Capitalize first letter
+      function capitalizeFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      // Show notification
+      function showNotification(message, type = "info") {
+        const notification = document.createElement("div");
+        notification.className = `alert alert-${type}`;
+        notification.innerHTML = `
+                <i class="fas fa-${
+                  type === "success"
+                    ? "check-circle"
+                    : type === "error"
+                    ? "exclamation-circle"
+                    : "info-circle"
+                }"></i>
+                <span>${message}</span>
+            `;
+
+        // Add to container or create one
+        let container = document.getElementById("notificationContainer");
+        if (!container) {
+          container = document.createElement("div");
+          container.id = "notificationContainer";
+          container.style.cssText =
+            "position: fixed; top: 80px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;";
+          document.body.appendChild(container);
+        }
+
+        container.appendChild(notification);
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+          notification.style.animation = "slideUp 0.3s ease";
+          setTimeout(() => notification.remove(), 300);
+        }, 5000);
+      }
+    </script>
+  </body>
+</html>

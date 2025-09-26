@@ -1,0 +1,335 @@
+/* Form Specific Styles */
+
+/* Form Steps */
+.form-step {
+  display: none;
+}
+
+.form-step.active {
+  display: block;
+  animation: fadeIn var(--transition-base);
+}
+.design-selector-compact > div.form-grid {
+  grid-area: footer;
+}
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+/* Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Form Controls */
+.form-control {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: all var(--transition-base);
+  background: white;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-control:disabled {
+  background: var(--gray-100);
+  cursor: not-allowed;
+}
+
+/* Input Groups */
+.input-group {
+  display: flex;
+  align-items: center;
+}
+
+.input-prefix,
+.input-suffix {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--gray-100);
+  border: 2px solid var(--gray-200);
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+.input-prefix {
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.input-suffix {
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.input-group .form-control {
+  flex: 1;
+  border-radius: 0;
+}
+
+.input-group .form-control:first-child {
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+.input-group .form-control:last-child {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Measurements Grid */
+.measurements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.measurement-item {
+  position: relative;
+}
+
+.measurement-item .unit {
+  position: absolute;
+  right: var(--spacing-md);
+  top: 70%;
+  left: 90%;
+  transform: translateY(-50%);
+  color: var(--gray-500);
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.measurement-item input {
+  padding-right: 2rem;
+}
+
+/* Design Selector Compact */
+.design-selector-compact {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  /* flex-direction: column; */
+  gap: var(--spacing-xl);
+}
+
+.design-category h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: whitesmoke;
+  padding: 10px;
+  background-color: var(--gray-500);
+  border-radius: 4px;
+  margin-bottom: var(--spacing-md);
+}
+
+.design-category h3::before {
+  content: "";
+  width: 4px;
+  height: 20px;
+  background: var(--success-color);
+  border-radius: var(--radius-sm);
+}
+.design-footer {
+  grid-column: 1 / span 3;
+}
+
+/* Design Options Row */
+.design-options-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--spacing-md);
+}
+
+/* Compact Design Option */
+.design-option-compact {
+  position: relative;
+  cursor: pointer;
+}
+
+.design-option-compact input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+}
+
+.design-option-compact .option-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  background: white;
+  transition: all var(--transition-base);
+  text-align: center;
+}
+
+.design-option-compact .option-content i {
+  font-size: 1.5rem;
+  color: var(--gray-500);
+  transition: all var(--transition-base);
+}
+
+.design-option-compact .option-content span {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.design-option-compact .option-content .flag {
+  font-size: 1.5rem;
+}
+
+.design-option-compact:hover .option-content {
+  border-color: var(--primary-color);
+  background: var(--gray-50);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.design-option-compact input[type="radio"]:checked + .option-content {
+  border-color: var(--primary-color);
+  background: linear-gradient(
+    135deg,
+    rgba(37, 99, 235, 0.05),
+    rgba(37, 99, 235, 0.1)
+  );
+  box-shadow: var(--shadow-md);
+}
+
+.design-option-compact input[type="radio"]:checked + .option-content i {
+  color: var(--primary-color);
+}
+
+.design-option-compact input[type="radio"]:checked + .option-content::after {
+  content: "✓";
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  width: 24px;
+  height: 24px;
+  background: var(--primary-color);
+  color: white;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+/* Checkbox Grid */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+}
+
+.checkbox-option:hover {
+  border-color: var(--primary-color);
+  background: var(--gray-50);
+}
+
+.checkbox-option input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkbox-option input[type="checkbox"]:checked + span {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+/* Payment Section */
+.payment-section {
+  background: var(--gray-50);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+}
+
+/* Form Navigation */
+.form-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-xl);
+  padding-top: var(--spacing-xl);
+  border-top: 2px solid var(--gray-100);
+}
+
+/* Textarea */
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* Validation States */
+.form-control.error {
+  border-color: var(--danger-color);
+}
+
+.form-control.success {
+  border-color: var(--success-color);
+}
+
+.error-message {
+  color: var(--danger-color);
+  font-size: 0.875rem;
+  margin-top: var(--spacing-xs);
+}
+
+/* RTL Support for Forms */
+body[data-lang="ar"] .form-group label {
+  text-align: right;
+}
+
+body[data-lang="ar"] .input-prefix {
+  border-right: 2px solid var(--gray-200);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+body[data-lang="ar"] .input-suffix {
+  border-left: 2px solid var(--gray-200);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+body[data-lang="ar"] .measurement-item .unit {
+  right: auto;
+  left: var(--spacing-md);
+}
+
+body[data-lang="ar"] .measurement-item input {
+  padding-right: var(--spacing-md);
+  padding-left: 3rem;
+}
