@@ -741,11 +741,11 @@
 
       // Contact support
       function contactSupport() {
-        const phone = "966557485529";
+        const phone = `+966${currentOrderData.phoneNumber}`;
         let message = "Hello, I need help with my order.";
 
         if (currentOrderData) {
-          message = `Hello, I need help with my order.\nReceipt ID: ${currentOrderData.receiptId}\nOrder Number: ${currentOrderData.orderNumber}`;
+          message = `Hello,Your Order: \nReceipt ID: ${currentOrderData.receiptId}\nOrder Number: ${currentOrderData.orderNumber} is ${currentOrderData.status}.\n`;
         }
 
         window.open(

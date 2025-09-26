@@ -103,7 +103,13 @@
     try {
       // Simple validation
       if (!data.customerName || !data.phoneNumber) {
-        throw new Error("Missing required fields");
+        // Skip validation for payment updates and other actions
+        if (
+          !data.action ||
+          (data.action !== "updatePayment" && data.action !== "updateStatus")
+        ) {
+          throw new Error("Missing required fields");
+        }
       }
 
       // Add timestamp
@@ -245,6 +251,38 @@
       return {
         status: "error",
         message: "Could not track order",
+      };
+    }
+  };
+
+  // Update payment - PROPERLY EXPOSED TO WINDOW
+  window.updatePayment = async function (receiptId, paymentAmount) {
+    try {
+      console.log("Updating payment:", receiptId, paymentAmount);
+
+      // Prepare payload for payment update
+      const payload = {
+        action: "updatePayment",
+        receiptId: receiptId,
+        paymentAmount: paymentAmount,
+        timestamp: new Date().toISOString(),
+      };
+
+      // Use postToAPI for consistency
+      await postToAPI(payload);
+
+      // Clear cache after update
+      cache.clear();
+
+      return {
+        status: "success",
+        message: "Payment updated successfully",
+      };
+    } catch (error) {
+      console.error("Error updating payment:", error);
+      return {
+        status: "error",
+        message: error.toString(),
       };
     }
   };

@@ -12,8 +12,8 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 function initializeApp() {
-  // Generate Order Number
-  generateOrderNumber();
+  // Generate or retrieve Order Number
+  generateOrderNumber(false); // false means don't force new number
 
   // Set default dates
   setDefaultDates();
@@ -35,13 +35,17 @@ function initializeApp() {
 }
 
 // Generate unique order number
-/* function generateOrderNumber() {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 100);
-  const orderNumber = `ORD ${timestamp}${random}`.slice(-2);
-  document.getElementById("orderNumber").textContent = orderNumber;
-} */
-function generateOrderNumber() {
+function generateOrderNumber(forceNew = true) {
+  // Check if we should use existing order number
+  if (!forceNew) {
+    const existingOrderNumber = sessionStorage.getItem("currentOrderNumber");
+    if (existingOrderNumber) {
+      document.getElementById("orderNumber").textContent = existingOrderNumber;
+      return existingOrderNumber;
+    }
+  }
+
+  // Generate new order number
   let counter = parseInt(sessionStorage.getItem("orderCounter") || "0");
   counter++;
   if (counter > 9999) {
@@ -49,6 +53,9 @@ function generateOrderNumber() {
   }
   sessionStorage.setItem("orderCounter", counter.toString());
   const orderNumber = `ORD-${String(counter).padStart(4, "0")}`;
+
+  // Store the current order number
+  sessionStorage.setItem("currentOrderNumber", orderNumber);
   document.getElementById("orderNumber").textContent = orderNumber;
   return orderNumber;
 }
@@ -188,6 +195,16 @@ async function handleFormSubmit(e) {
     await sendNotifications(formData);
 
     showNotification(getTranslation("orderSaved"), "success");
+
+    // Clear the current order number from session storage
+    // This will ensure a new number is generated for the next order
+    sessionStorage.removeItem("currentOrderNumber");
+
+    // DON'T generate new order number here - wait for user action
+    // The new number will be generated when:
+    // 1. User clicks "New Order" button
+    // 2. User refreshes the page
+    // 3. User navigates away and comes back
   } catch (error) {
     console.error("Error saving order:", error);
     showNotification(getTranslation("errorSaving"), "error");
@@ -271,303 +288,22 @@ async function loadLastMeasurements() {
     return;
   }
 
-  try {
-    const response = await searchCustomer(phone);
+  // Get the Load Previous button and store original content
+  const loadPrevBtn =
+    document.querySelector('button[onclick*="loadLastMeasurements"]') ||
+    document.querySelector('.btn-outline[onclick*="loadLastMeasurements"]') ||
+    document.querySelector("button.btn-outline");
 
-    if (response.status === "success" && response.orders.length > 0) {
-      const lastOrder = response.orders[0];
+  let originalBtnContent = "";
+  let originalBtnDisabled = false;
 
-      // Fill measurements
-      const measurements = [
-        "customerName",
-        "length",
-        "shoulder",
-        "sleeveLength",
-        "sleeveWidth",
-        "chestWidth",
-        "neck",
-        "handWidth",
-        "cuffLength",
-        "jubjurType",
-        "pocketType",
-        "cuffType",
-        "collarType",
-        "garmentStyle",
-      ];
+  if (loadPrevBtn) {
+    originalBtnContent = loadPrevBtn.innerHTML;
+    originalBtnDisabled = loadPrevBtn.disabled;
 
-      measurements.forEach((field) => {
-        const input = document.querySelector(`input[name="${field}"]`);
-        if (input && lastOrder[field] && lastOrder[field] !== "-") {
-          input.value = lastOrder[field];
-        }
-      });
-
-      showNotification(getTranslation("measurementsLoaded"), "success");
-    } else {
-      showNotification(getTranslation("noMeasurements"), "info");
-    }
-  } catch (error) {
-    console.error("Error loading measurements:", error);
-    showNotification(getTranslation("errorLoading"), "error");
-  }
-}
-
-// WhatsApp Integration
-function openWhatsApp() {
-  const phone = "966557485529"; // Business WhatsApp number
-  const message = encodeURIComponent(
-    "Hello, I would like to inquire about tailoring services."
-  );
-  window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-}
-
-function sendWhatsApp() {
-  const customerPhone = formData.phoneNumber.replace(/\D/g, "");
-  const message = generateWhatsAppMessage(formData);
-  window.open(
-    `https://wa.me/966${customerPhone}?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
-}
-
-function generateWhatsAppMessage(data) {
-  let message = "";
-
-  if (currentLang === "ar") {
-    message = `مرحباً ${data.customerName},\n\n`;
-    message += `شكراً لطلبك من مؤسسة سجيم إبراهيم محمد الفضلي للخياطة.\n\n`;
-    message += `📋 تفاصيل الطلب:\n`;
-    message += `رقم الطلب: ${data.orderNumber}\n`;
-    message += `رقم الإيصال: ${data.receiptId}\n`;
-    message += `تاريخ التسليم: ${formatDate(data.deliveryDate)}\n`;
-    message += `عدد الثياب: ${data.thobeCount}\n\n`;
-    message += `💰 الدفع:\n`;
-    message += `الإجمالي: ${data.totalAmount} ريال\n`;
-    message += `المدفوع: ${data.paidAmount} ريال\n`;
-    message += `المتبقي: ${data.remainingAmount} ريال\n\n`;
-    message += `📍 العنوان: الرياض - حي الحمراء - شارع المصانع\n`;
-    message += `📞 للاستفسار: 0557450529\n\n`;
-    message += `يمكنك تتبع طلبك من خلال الرابط:\n`;
-    message += `${window.location.origin}/order-status.html?id=${data.receiptId}`;
-  } else if (currentLang === "bn") {
-    message = `হ্যালো ${data.customerName},\n\n`;
-    message += `সামি ইব্রাহিম মুহাম্মদ আলফাদলি টেইলারিং থেকে আপনার অর্ডারের জন্য ধন্যবাদ।\n\n`;
-    message += `📋 অর্ডার বিবরণ:\n`;
-    message += `অর্ডার নম্বর: ${data.orderNumber}\n`;
-    message += `রসিদ নম্বর: ${data.receiptId}\n`;
-    message += `ডেলিভারি তারিখ: ${formatDate(data.deliveryDate)}\n`;
-    message += `পোশাক সংখ্যা: ${data.thobeCount}\n\n`;
-    message += `💰 পেমেন্ট:\n`;
-    message += `মোট: ${data.totalAmount} রিয়াল\n`;
-    message += `পরিশোধিত: ${data.paidAmount} রিয়াল\n`;
-    message += `বাকি: ${data.remainingAmount} রিয়াল\n\n`;
-    message += `📍 ঠিকানা: রিয়াদ - আল হামরা জেলা - আল মাসানে রাস্তা\n`;
-    message += `📞 যোগাযোগ: 0557450529\n\n`;
-    message += `আপনার অর্ডার ট্র্যাক করুন:\n`;
-    message += `${window.location.origin}/order-status.html?id=${data.receiptId}`;
-  } else {
-    message = `Hello ${data.customerName},\n\n`;
-    message += `Thank you for your order at Samee Ibrahim Muhammad Alfadhli Tailoring.\n\n`;
-    message += `📋 Order Details:\n`;
-    message += `Order Number: ${data.orderNumber}\n`;
-    message += `Receipt ID: ${data.receiptId}\n`;
-    message += `Delivery Date: ${formatDate(data.deliveryDate)}\n`;
-    message += `Number of Thobes: ${data.thobeCount}\n\n`;
-    message += `💰 Payment:\n`;
-    message += `Total: ${data.totalAmount} SAR\n`;
-    message += `Paid: ${data.paidAmount} SAR\n`;
-    message += `Remaining: ${data.remainingAmount} SAR\n\n`;
-    message += `📍 Address: Riyadh - Al Hamra District - Al Masane Street\n`;
-    message += `📞 Contact: 0557450529\n\n`;
-    message += `Track your order:\n`;
-    message += `${window.location.origin}/order-status.html?id=${data.receiptId}`;
-  }
-
-  return message;
-}
-
-// Send notifications (WhatsApp/SMS)
-async function sendNotifications(data) {
-  // This would integrate with actual SMS/WhatsApp API
-  // For now, we'll just log the intent
-  console.log("Sending notifications for order:", data.orderNumber);
-
-  // Store notification preferences
-  const notifications = {
-    orderConfirmation: true,
-    readyForPickup: false,
-    delivered: false,
-  };
-
-  localStorage.setItem(
-    `notifications_${data.receiptId}`,
-    JSON.stringify(notifications)
-  );
-}
-
-// New Order
-function newOrder() {
-  // Reset form
-  document.getElementById("tailorForm").reset();
-
-  // Generate new order number
-  generateOrderNumber();
-  setDefaultDates();
-
-  // Hide receipt modal
-  document.getElementById("receiptModal").classList.remove("show");
-
-  // Update navigation buttons
-  // updateNavigationButtons();
-
-  scrollToTop();
-}
-
-//   addd--__-------------__--------------------
-//   --__-------------__--------------------
-// Print Receipt
-function printReceipt() {
-  const receiptContent = document.getElementById("receipt");
-  if (!receiptContent) {
-    console.error("Element with ID 'receipt' not found.");
-    return;
-  }
-
-  // Get order number for filename
-  const orderNumberElement = receiptContent.querySelector(".badge-number");
-  const orderNumber = orderNumberElement
-    ? orderNumberElement.textContent.trim()
-    : "Receipt";
-
-  // Create offscreen iframe
-  const iframe = document.createElement("iframe");
-  iframe.style.position = "absolute";
-  iframe.style.width = "0";
-  iframe.style.height = "0";
-  iframe.style.border = "0";
-  iframe.style.left = "-9999px";
-  document.body.appendChild(iframe);
-
-  const win = iframe.contentWindow;
-  const doc = win.document;
-
-  // Get all necessary resources
-  const cssLink = document.querySelector('link[href*="receipt.css"]');
-  const cssHref = cssLink
-    ? cssLink.href
-    : `${window.location.origin}/css/receipt.css`;
-
-  // Check for Font Awesome
-  const fontAwesomeLink = document.querySelector(
-    'link[href*="fontawesome"], link[href*="font-awesome"], link[href*="fa"]'
-  );
-  const fontAwesomeHref = fontAwesomeLink
-    ? fontAwesomeLink.href
-    : "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css";
-
-  // Check for Google Fonts (Inter)
-  const interFontHref =
-    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
-
-  // Build the document
-  doc.open();
-  doc.write(`<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order-${orderNumber}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="${interFontHref}" rel="stylesheet">
-    <link rel="stylesheet" href="${fontAwesomeHref}">
-    <link rel="stylesheet" href="${cssHref}">
-</head>
-<body>
-    ${receiptContent.outerHTML}
-</body>
-</html>`);
-  doc.close();
-
-  // Enhanced cleanup
-  function cleanup() {
-    setTimeout(() => {
-      if (iframe && iframe.parentNode) {
-        document.body.removeChild(iframe);
-      }
-    }, 100);
-  }
-
-  // Print execution with proper timing
-  function executePrint() {
-    try {
-      win.focus();
-
-      // Handle print completion
-      if (win.matchMedia) {
-        const mediaQueryList = win.matchMedia("print");
-        mediaQueryList.addListener(function (mql) {
-          if (!mql.matches) {
-            cleanup();
-          }
-        });
-      }
-
-      win.onafterprint = cleanup;
-      win.print();
-    } catch (err) {
-      console.error("Print error:", err);
-      cleanup();
-    }
-  }
-
-  // Wait for all resources to load
-  let resourcesLoaded = 0;
-  const totalResources = 3; // CSS, Font Awesome, Google Fonts
-
-  function checkResourcesAndPrint() {
-    resourcesLoaded++;
-    if (resourcesLoaded >= totalResources) {
-      // All resources loaded, wait a bit for rendering
-      setTimeout(executePrint, 300);
-    }
-  }
-
-  // Monitor CSS loading
-  const checkCSS = setInterval(() => {
-    try {
-      const testEl = doc.body.querySelector(".modern-receipt-container");
-      if (testEl) {
-        const styles = win.getComputedStyle(testEl);
-        if (styles.fontFamily.includes("Inter")) {
-          clearInterval(checkCSS);
-          checkResourcesAndPrint();
-        }
-      }
-    } catch (e) {}
-  }, 50);
-
-  // Timeout fallback
-  setTimeout(() => {
-    clearInterval(checkCSS);
-    if (iframe.parentNode) {
-      executePrint();
-    }
-  }, 3000);
-
-  // Monitor iframe load
-  iframe.onload = checkResourcesAndPrint;
-
-  // Monitor window load
-  win.addEventListener("load", checkResourcesAndPrint);
-}
-
-async function loadLastMeasurements() {
-  const phone = document.querySelector('input[name="phoneNumber"]').value;
-
-  if (!phone) {
-    showNotification(getTranslation("enterPhone"), "warning");
-    return;
+    // Add loading animation
+    loadPrevBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+    loadPrevBtn.disabled = true;
   }
 
   try {
@@ -674,7 +410,291 @@ async function loadLastMeasurements() {
   } catch (error) {
     console.error("Error loading measurements:", error);
     showNotification(getTranslation("errorLoading"), "error");
+  } finally {
+    // Restore original button state
+    if (loadPrevBtn) {
+      loadPrevBtn.innerHTML = originalBtnContent;
+      loadPrevBtn.disabled = originalBtnDisabled;
+    }
   }
+}
+
+// WhatsApp Integration
+function openWhatsApp() {
+  const phone = "966557485529"; // Business WhatsApp number
+  const message = encodeURIComponent(
+    "Hello, I would like to inquire about tailoring services."
+  );
+  window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+}
+
+function sendWhatsApp() {
+  const customerPhone = formData.phoneNumber.replace(/\D/g, "");
+  const message = generateWhatsAppMessage(formData);
+  window.open(
+    `https://wa.me/966${customerPhone}?text=${encodeURIComponent(message)}`,
+    "_blank"
+  );
+}
+
+function generateWhatsAppMessage(data) {
+  let message = "";
+
+  if (currentLang === "ar") {
+    message = `مرحباً ${data.customerName},\n\n`;
+    message += `شكراً لطلبك من مؤسسة سجيم إبراهيم محمد الفضلي للخياطة.\n\n`;
+    message += `📋 تفاصيل الطلب:\n`;
+    message += `رقم الطلب: ${data.orderNumber}\n`;
+    message += `رقم الإيصال: ${data.receiptId}\n`;
+    message += `تاريخ التسليم: ${formatDate(data.deliveryDate)}\n`;
+    message += `عدد الثياب: ${data.thobeCount}\n\n`;
+    message += `💰 الدفع:\n`;
+    message += `الإجمالي: ${data.totalAmount} ريال\n`;
+    message += `المدفوع: ${data.paidAmount} ريال\n`;
+    message += `المتبقي: ${data.remainingAmount} ريال\n\n`;
+    message += `📍 العنوان: الرياض - حي الحمراء - شارع المصانع\n`;
+    message += `📞 للاستفسار: 0557450529\n\n`;
+    message += `يمكنك تتبع طلبك من خلال الرابط:\n`;
+    message += `${window.location.origin}/order-status.html?id=${data.receiptId}`;
+  } else if (currentLang === "bn") {
+    message = `হ্যালো ${data.customerName},\n\n`;
+    message += `সামি ইব্রাহিম মুহাম্মদ আলফাদলি টেইলারিং থেকে আপনার অর্ডারের জন্য ধন্যবাদ।\n\n`;
+    message += `📋 অর্ডার বিবরণ:\n`;
+    message += `অর্ডার নম্বর: ${data.orderNumber}\n`;
+    message += `রসিদ নম্বর: ${data.receiptId}\n`;
+    message += `ডেলিভারি তারিখ: ${formatDate(data.deliveryDate)}\n`;
+    message += `পোশাক সংখ্যা: ${data.thobeCount}\n\n`;
+    message += `💰 পেমেন্ট:\n`;
+    message += `মোট: ${data.totalAmount} রিয়াল\n`;
+    message += `পরিশোধিত: ${data.paidAmount} রিয়াল\n`;
+    message += `বাকি: ${data.remainingAmount} রিয়াল\n\n`;
+    message += `📍 ঠিকানা: রিয়াদ - আল হামরা জেলা - আল মাসানে রাস্তা\n`;
+    message += `📞 যোগাযোগ: 0557450529\n\n`;
+    message += `আপনার অর্ডার ট্র্যাক করুন:\n`;
+    message += `${window.location.origin}/order-status.html?id=${data.receiptId}`;
+  } else {
+    message = `Hello ${data.customerName},\n\n`;
+    message += `Thank you for your order at Samee Ibrahim Muhammad Alfadhli Tailoring.\n\n`;
+    message += `📋 Order Details:\n`;
+    message += `Order Number: ${data.orderNumber}\n`;
+    message += `Receipt ID: ${data.receiptId}\n`;
+    message += `Delivery Date: ${formatDate(data.deliveryDate)}\n`;
+    message += `Number of Thobes: ${data.thobeCount}\n\n`;
+    message += `💰 Payment:\n`;
+    message += `Total: ${data.totalAmount} SAR\n`;
+    message += `Paid: ${data.paidAmount} SAR\n`;
+    message += `Remaining: ${data.remainingAmount} SAR\n\n`;
+    message += `📍 Address: Riyadh - Al Hamra District - Al Masane Street\n`;
+    message += `📞 Contact: 0557450529\n\n`;
+    message += `Track your order:\n`;
+    message += `${window.location.origin}/order-status.html?id=${data.receiptId}`;
+  }
+
+  return message;
+}
+
+// Send notifications (WhatsApp/SMS)
+async function sendNotifications(data) {
+  // This would integrate with actual SMS/WhatsApp API
+  // For now, we'll just log the intent
+  console.log("Sending notifications for order:", data.orderNumber);
+
+  // Store notification preferences
+  const notifications = {
+    orderConfirmation: true,
+    readyForPickup: false,
+    delivered: false,
+  };
+
+  localStorage.setItem(
+    `notifications_${data.receiptId}`,
+    JSON.stringify(notifications)
+  );
+}
+
+// New Order
+function newOrder() {
+  // Reset form
+  document.getElementById("tailorForm").reset();
+
+  // Generate new order number only when creating a new order
+  generateOrderNumber(true); // true means force new number
+  setDefaultDates();
+
+  // Hide receipt modal
+  document.getElementById("receiptModal").classList.remove("show");
+
+  // Update navigation buttons
+  // updateNavigationButtons();
+
+  scrollToTop();
+}
+
+//   addd--__-------------__--------------------
+//   --__-------------__--------------------
+// Print Receipt - Fixed to prevent duplicate windows
+let isPrinting = false; // Flag to prevent duplicate print calls
+
+function printReceipt() {
+  // Prevent duplicate print calls
+  if (isPrinting) {
+    return;
+  }
+  isPrinting = true;
+
+  const receiptContent = document.getElementById("receipt");
+  if (!receiptContent) {
+    console.error("Element with ID 'receipt' not found.");
+    isPrinting = false;
+    return;
+  }
+
+  // Get order number for filename
+  const orderNumberElement = receiptContent.querySelector(".badge-number");
+  const orderNumber = orderNumberElement
+    ? orderNumberElement.textContent.trim()
+    : "Receipt";
+
+  // Create offscreen iframe
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "absolute";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  iframe.style.left = "-9999px";
+  document.body.appendChild(iframe);
+
+  const win = iframe.contentWindow;
+  const doc = win.document;
+
+  // Get all necessary resources
+  const cssLink = document.querySelector('link[href*="receipt.css"]');
+  const cssHref = cssLink
+    ? cssLink.href
+    : `${window.location.origin}/css/receipt.css`;
+
+  // Check for Font Awesome
+  const fontAwesomeLink = document.querySelector(
+    'link[href*="fontawesome"], link[href*="font-awesome"], link[href*="fa"]'
+  );
+  const fontAwesomeHref = fontAwesomeLink
+    ? fontAwesomeLink.href
+    : "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css";
+
+  // Check for Google Fonts (Inter)
+  const interFontHref =
+    "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
+
+  // Build the document
+  doc.open();
+  doc.write(`<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order-${orderNumber}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="${interFontHref}" rel="stylesheet">
+    <link rel="stylesheet" href="${fontAwesomeHref}">
+    <link rel="stylesheet" href="${cssHref}">
+</head>
+<body>
+    ${receiptContent.outerHTML}
+</body>
+</html>`);
+  doc.close();
+
+  // Enhanced cleanup
+  function cleanup() {
+    setTimeout(() => {
+      if (iframe && iframe.parentNode) {
+        document.body.removeChild(iframe);
+      }
+      isPrinting = false; // Reset the flag
+    }, 100);
+  }
+
+  // Print execution with proper timing
+  function executePrint() {
+    try {
+      win.focus();
+
+      // Handle print completion
+      if (win.matchMedia) {
+        const mediaQueryList = win.matchMedia("print");
+        mediaQueryList.addListener(function (mql) {
+          if (!mql.matches) {
+            cleanup();
+          }
+        });
+      }
+
+      win.onafterprint = cleanup;
+      win.print();
+    } catch (err) {
+      console.error("Print error:", err);
+      cleanup();
+    }
+  }
+
+  // Wait for all resources to load
+  let resourcesLoaded = 0;
+  const totalResources = 3; // CSS, Font Awesome, Google Fonts
+  let hasExecuted = false; // Prevent multiple executions
+
+  function checkResourcesAndPrint() {
+    if (hasExecuted) return;
+
+    resourcesLoaded++;
+    if (resourcesLoaded >= totalResources) {
+      hasExecuted = true;
+      // All resources loaded, wait a bit for rendering
+      setTimeout(executePrint, 300);
+    }
+  }
+
+  // Monitor CSS loading
+  const checkCSS = setInterval(() => {
+    if (hasExecuted) {
+      clearInterval(checkCSS);
+      return;
+    }
+
+    try {
+      const testEl = doc.body.querySelector(".modern-receipt-container");
+      if (testEl) {
+        const styles = win.getComputedStyle(testEl);
+        if (styles.fontFamily.includes("Inter")) {
+          clearInterval(checkCSS);
+          checkResourcesAndPrint();
+        }
+      }
+    } catch (e) {}
+  }, 50);
+
+  // Timeout fallback
+  setTimeout(() => {
+    clearInterval(checkCSS);
+    if (!hasExecuted && iframe.parentNode) {
+      hasExecuted = true;
+      executePrint();
+    }
+  }, 3000);
+
+  // Monitor iframe load - use addEventListener instead of onload
+  iframe.addEventListener("load", () => {
+    if (!hasExecuted) {
+      checkResourcesAndPrint();
+    }
+  });
+
+  // Monitor window load
+  win.addEventListener("load", () => {
+    if (!hasExecuted) {
+      checkResourcesAndPrint();
+    }
+  });
 }
 
 //---------------------------------------------------------------------------

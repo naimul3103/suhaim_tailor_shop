@@ -191,7 +191,7 @@ function generateReceipt(data) {
 
   // Generate QR Code with better error handling
   setTimeout(() => {
-    generateQRCodeSafe(qrCodeData);
+    generateQRCode(qrCodeData);
   }, 100);
 }
 
@@ -634,96 +634,64 @@ function formatReceiptDate(dateString, lang = "en") {
   return `${day}/${month}/${year}`;
 }
 
-// Improved QR Code Generation with better error handling
-function generateQRCodeSafe(data) {
+// Single QR Code Generation function - API based
+function generateQRCode(data) {
   const qrcodeElement = document.getElementById("qrcode");
   if (!qrcodeElement) {
     console.error("QR code element not found");
     return;
   }
 
+  // Clear any existing content
   qrcodeElement.innerHTML = "";
 
-  try {
-    // Check if QRCode library is available
-    if (typeof QRCode !== "undefined") {
-      new QRCode(qrcodeElement, {
-        text: data,
-        width: 100,
-        height: 100,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.L : 0,
-      });
+  // Use QR Code API service
+  const qrSize = 150;
+  const qrData = encodeURIComponent(data);
+
+  // Try multiple QR code APIs for redundancy
+  const qrApis = [
+    `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${qrData}`,
+    `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${qrData}`,
+  ];
+
+  // Create QR code with fallback
+  const img = document.createElement("img");
+  img.src = qrApis[0];
+  img.alt = "QR Code";
+  img.style.cssText =
+    "width: 100px; height: 100px; border: 1px solid #ddd; padding: 5px; background: white;";
+
+  // Handle error with fallback
+  img.onerror = function () {
+    this.onerror = null; // Prevent infinite loop
+    if (qrApis[1]) {
+      this.src = qrApis[1];
     } else {
-      // Use fallback if library not loaded
-      console.warn("QRCode library not loaded, using fallback");
-      generateQRCodeFallback(qrcodeElement, data);
+      // Final fallback - display text
+      const receiptId = data.split("=").pop() || data.substr(-8);
+      qrcodeElement.innerHTML = `
+        <div style="
+          width: 100px; 
+          height: 100px; 
+          border: 2px solid #000; 
+          display: flex; 
+          align-items: center; 
+          justify-content: center; 
+          flex-direction: column;
+          font-size: 10px; 
+          text-align: center; 
+          padding: 5px;
+          box-sizing: border-box;
+          background: white;
+        ">
+          <div style="font-size: 24px; margin-bottom: 5px;">📱</div>
+          <div style="font-weight: bold;">TRACK</div>
+          <div style="font-size: 10px; margin-top: 2px;">${receiptId}</div>
+        </div>
+      `;
     }
-  } catch (error) {
-    console.error("QR Code generation error:", error);
-    // Use fallback on error
-    generateQRCodeFallback(qrcodeElement, data);
-  }
-}
+  };
 
-// Fallback QR Code display
-function generateQRCodeFallback(element, data) {
-  const receiptId = data.split("=").pop() || data.substr(-8);
-  element.innerHTML = `
-    <div style="
-      width: 100px; 
-      height: 100px; 
-      border: 2px solid #000; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      flex-direction: column;
-      font-size: 11px; 
-      text-align: center; 
-      padding: 5px;
-      box-sizing: border-box;
-      background: white;
-    ">
-      <div style="font-size: 24px; margin-bottom: 5px;">📱</div>
-      <div style="font-weight: bold;">TRACK</div>
-      <div style="font-size: 10px; margin-top: 2px;">${receiptId}</div>
-    </div>
-  `;
-}
-
-// Backward compatibility - keep old function name
-// function generateQRCode(data) {
-//   generateQRCodeSafe(data);
-// }
-
-// Replace the generateQRCode function with this:
-function generateQRCode(data) {
-  const qrcodeElement = document.getElementById("qrcode");
-  if (qrcodeElement) {
-    // Use QR Code API service (no library needed)
-    const qrSize = 150;
-    const qrData = encodeURIComponent(data);
-
-    // Try multiple QR code APIs for redundancy
-    const qrApis = [
-      `https://api.qrserver.com/v1/create-qr-code/?size=${qrSize}x${qrSize}&data=${qrData}`,
-      `https://chart.googleapis.com/chart?chs=${qrSize}x${qrSize}&cht=qr&chl=${qrData}`,
-      `https://qr-generator.qrcode.studio/qr/custom?data=${qrData}&size=${qrSize}`,
-    ];
-
-    // Create QR code with fallback
-    qrcodeElement.innerHTML = `
-      <img 
-        src="${qrApis[0]}" 
-        alt="QR Code" 
-        style="width: 100px; height: 100px; border: 1px solid #ddd; padding: 5px; background: white;"
-        onerror="this.onerror=null; this.src='${
-          qrApis[1]
-        }' || this.parentElement.innerHTML='<div style=\\'width:100px;height:100px;border:2px solid #000;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:10px;text-align:center;padding:5px;\\'>📱<br>TRACK<br>${data.substr(
-      -8
-    )}</div>'"
-      />
-    `;
-  }
+  qrcodeElement.appendChild(img);
 }

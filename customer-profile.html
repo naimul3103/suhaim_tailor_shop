@@ -368,6 +368,15 @@
         background: var(--secondary-dark);
       }
 
+      .action-btn-payment {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .action-btn-payment:hover {
+        background: #d97706;
+      }
+
       .quick-actions-section {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -432,7 +441,8 @@
         opacity: 0.5;
       }
 
-      .status-update-modal {
+      .status-update-modal,
+      .payment-modal {
         display: none;
         position: fixed;
         top: 0;
@@ -445,7 +455,8 @@
         justify-content: center;
       }
 
-      .status-update-modal.show {
+      .status-update-modal.show,
+      .payment-modal.show {
         display: flex;
       }
 
@@ -502,6 +513,65 @@
       .status-option.selected {
         border-color: var(--primary-color);
         background: rgba(37, 99, 235, 0.05);
+      }
+
+      .payment-info {
+        background: var(--gray-50);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .payment-info-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+      }
+
+      .payment-info-row:last-child {
+        margin-bottom: 0;
+        padding-top: 0.75rem;
+        border-top: 2px solid var(--gray-200);
+        font-weight: bold;
+        font-size: 1.125rem;
+      }
+
+      .payment-input-group {
+        margin-bottom: 1.5rem;
+      }
+
+      .payment-input-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--gray-700);
+      }
+
+      .payment-input-group input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--gray-200);
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: all var(--transition-base);
+      }
+
+      .payment-input-group input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      }
+
+      .payment-input-group .input-help {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-top: 0.25rem;
+      }
+
+      .payment-input-group .input-error {
+        font-size: 0.875rem;
+        color: #ef4444;
+        margin-top: 0.25rem;
       }
 
       /* Receipt Modal Styles */
@@ -911,6 +981,7 @@
                   <th data-lang="date">Date</th>
                   <th data-lang="items">Items</th>
                   <th data-lang="total">Total</th>
+                  <th data-lang="remaining">Remaining</th>
                   <th data-lang="status">Status</th>
                   <th data-lang="actions">Actions</th>
                 </tr>
@@ -1080,6 +1151,77 @@
       </div>
     </div>
 
+    <!-- Payment Modal -->
+    <div class="payment-modal" id="paymentModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" data-lang="updatePayment">Update Payment</h2>
+          <button class="modal-close" onclick="closePaymentModal()">×</button>
+        </div>
+
+        <div class="payment-info">
+          <div class="payment-info-row">
+            <span data-lang="orderNumber">Order Number</span>
+            <span id="paymentOrderNumber">-</span>
+          </div>
+          <div class="payment-info-row">
+            <span data-lang="customerName">Customer</span>
+            <span id="paymentCustomerName">-</span>
+          </div>
+          <div class="payment-info-row">
+            <span data-lang="totalAmount">Total Amount</span>
+            <span id="paymentTotalAmount">0</span>
+          </div>
+          <div class="payment-info-row">
+            <span data-lang="paidAmount">Already Paid</span>
+            <span id="paymentPaidAmount">0</span>
+          </div>
+          <div class="payment-info-row">
+            <span data-lang="remainingAmount">Remaining Amount</span>
+            <span id="paymentRemainingAmount" style="color: #ef4444">0</span>
+          </div>
+        </div>
+
+        <div class="payment-input-group">
+          <label for="newPaymentAmount" data-lang="enterPaymentAmount"
+            >Enter Payment Amount</label
+          >
+          <input
+            type="number"
+            id="newPaymentAmount"
+            placeholder="Enter amount to pay"
+            min="0"
+            step="0.01"
+            onkeyup="validatePaymentAmount()"
+            oninput="validatePaymentAmount()"
+          />
+          <div class="input-help" id="paymentHelp" data-lang="paymentHelp"
+            >Enter amount to pay (cannot exceed remaining amount)</div
+          >
+          <div
+            class="input-error"
+            id="paymentError"
+            style="display: none"
+          ></div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end">
+          <button class="btn-secondary" onclick="closePaymentModal()">
+            <span data-lang="cancel">Cancel</span>
+          </button>
+          <button
+            class="btn-primary"
+            id="updatePaymentBtn"
+            onclick="performPaymentUpdate()"
+            disabled
+          >
+            <i class="fas fa-money-bill"></i>
+            <span data-lang="updatePayment">Update Payment</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Receipt Modal -->
     <div id="receiptModal" class="modal">
       <div class="modal-content">
@@ -1131,6 +1273,7 @@
       let customerOrders = [];
       let currentUpdateOrder = null;
       let currentViewOrder = null;
+      let currentPaymentOrder = null;
 
       // Initialize page
       document.addEventListener("DOMContentLoaded", function () {
@@ -1314,6 +1457,7 @@
           const row = document.createElement("tr");
 
           const statusClass = getStatusClass(order.status);
+          const remainingAmount = parseFloat(order.remainingAmount) || 0;
 
           // Store order data as JSON string in data attribute
           row.setAttribute("data-order", JSON.stringify(order));
@@ -1323,6 +1467,11 @@
                     <td>${formatDate(order.orderDate)}</td>
                     <td>${order.thobeCount || 1}</td>
                     <td>${order.totalAmount || "0"} ${getCurrency()}</td>
+                    <td style="color: ${
+                      remainingAmount > 0 ? "#ef4444" : "#22c55e"
+                    }; font-weight: bold;">
+                      ${remainingAmount.toFixed(2)} ${getCurrency()}
+                    </td>
                     <td><span class="order-status-badge ${statusClass}">${
             order.status || "New"
           }</span></td>
@@ -1339,6 +1488,17 @@
                             ).replace(/'/g, "&apos;")})'>
                                 <i class="fas fa-print"></i>
                             </button>
+                            ${
+                              remainingAmount > 0
+                                ? `
+                            <button class="action-btn action-btn-payment" onclick='openPaymentModal(${JSON.stringify(
+                              order
+                            ).replace(/'/g, "&apos;")})'>
+                                <i class="fas fa-money-bill"></i>
+                                <span>Payment</span>
+                            </button>`
+                                : ""
+                            }
                             <button class="action-btn action-btn-update" onclick="openStatusModal('${
                               order.receiptId
                             }', '${order.orderNumber}', '${
@@ -1352,6 +1512,129 @@
 
           tbody.appendChild(row);
         });
+      }
+
+      // Open payment modal
+      function openPaymentModal(order) {
+        currentPaymentOrder = order;
+
+        // Update modal with order details
+        document.getElementById("paymentOrderNumber").textContent =
+          order.orderNumber || "-";
+        document.getElementById("paymentCustomerName").textContent =
+          order.customerName || "-";
+        document.getElementById("paymentTotalAmount").textContent = `${
+          order.totalAmount || 0
+        } ${getCurrency()}`;
+        document.getElementById("paymentPaidAmount").textContent = `${
+          order.paidAmount || 0
+        } ${getCurrency()}`;
+
+        const remaining = parseFloat(order.remainingAmount) || 0;
+        document.getElementById(
+          "paymentRemainingAmount"
+        ).textContent = `${remaining.toFixed(2)} ${getCurrency()}`;
+
+        // Reset input
+        document.getElementById("newPaymentAmount").value = "";
+        document.getElementById("newPaymentAmount").max = remaining;
+        document.getElementById("paymentError").style.display = "none";
+        document.getElementById("updatePaymentBtn").disabled = true;
+
+        // Show modal
+        document.getElementById("paymentModal").classList.add("show");
+      }
+
+      // Close payment modal
+      function closePaymentModal() {
+        document.getElementById("paymentModal").classList.remove("show");
+        currentPaymentOrder = null;
+      }
+
+      // Validate payment amount
+      function validatePaymentAmount() {
+        const input = document.getElementById("newPaymentAmount");
+        const errorDiv = document.getElementById("paymentError");
+        const updateBtn = document.getElementById("updatePaymentBtn");
+
+        const amount = parseFloat(input.value) || 0;
+        const remaining = parseFloat(currentPaymentOrder?.remainingAmount) || 0;
+
+        if (amount <= 0) {
+          errorDiv.textContent = "Please enter a valid amount";
+          errorDiv.style.display = "block";
+          updateBtn.disabled = true;
+        } else if (amount > remaining) {
+          errorDiv.textContent = `Amount cannot exceed ${remaining.toFixed(
+            2
+          )} ${getCurrency()}`;
+          errorDiv.style.display = "block";
+          updateBtn.disabled = true;
+        } else {
+          errorDiv.style.display = "none";
+          updateBtn.disabled = false;
+        }
+      }
+
+      // Update payment
+      async function performPaymentUpdate() {
+        if (!currentPaymentOrder) return;
+
+        const amount =
+          parseFloat(document.getElementById("newPaymentAmount").value) || 0;
+        if (amount <= 0) {
+          showNotification("Please enter a valid amount", "warning");
+          return;
+        }
+
+        try {
+          showNotification("Updating payment...", "info");
+
+          // Check if updatePayment function exists
+          if (typeof updatePayment !== "function") {
+            console.error("updatePayment function not found");
+            showNotification(
+              "System error. Please refresh and try again.",
+              "error"
+            );
+            return;
+          }
+
+          // Update payment in database
+          const response = await updatePayment(
+            currentPaymentOrder.receiptId,
+            amount
+          );
+
+          if (response && response.status === "success") {
+            showNotification("Payment updated successfully", "success");
+
+            // Update the order in our local data
+            const orderIndex = customerOrders.findIndex(
+              (o) => o.receiptId === currentPaymentOrder.receiptId
+            );
+            if (orderIndex !== -1) {
+              customerOrders[orderIndex].paidAmount =
+                parseFloat(customerOrders[orderIndex].paidAmount || 0) + amount;
+              customerOrders[orderIndex].remainingAmount =
+                parseFloat(customerOrders[orderIndex].remainingAmount || 0) -
+                amount;
+
+              // Refresh the display
+              populateOrdersTable(customerOrders);
+
+              // Update statistics
+              displayCustomerProfile(currentCustomerData, customerOrders);
+            }
+
+            closePaymentModal();
+          } else {
+            showNotification("Error updating payment", "error");
+          }
+        } catch (error) {
+          console.error("Error updating payment:", error);
+          showNotification("Error updating payment", "error");
+        }
       }
 
       // Get status class
@@ -1427,23 +1710,13 @@
       }
 
       // Print receipt from modal
-      // Print receipt from modal
-      /*function printReceipt() {
-        document.body.classList.add("printing-receipt");
-        setTimeout(() => {
-          window.print();
-          setTimeout(() => {
-            document.body.classList.remove("printing-receipt");
-          }, 100);
-        }, 100);
-      }*/
-
       function printReceipt() {
         // Small delay to ensure receipt is fully rendered
         setTimeout(() => {
           window.print();
         }, 100);
       }
+
       // Send WhatsApp from receipt modal
       function sendWhatsApp() {
         if (!currentViewOrder) return;
