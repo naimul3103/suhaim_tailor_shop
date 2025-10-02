@@ -1,8 +1,9 @@
 // Main Application JavaScript
+// Main Application JavaScript
 
 // Global Variables
-let currentStep = 1;
-const totalSteps = 4;
+// let currentStep = 1;
+// const totalSteps = 4;
 let formData = {};
 let currentLang = "en";
 
@@ -11,9 +12,9 @@ document.addEventListener("DOMContentLoaded", function () {
   initializeApp();
 });
 
-function initializeApp() {
-  // Generate or retrieve Order Number
-  generateOrderNumber(false); // false means don't force new number
+async function initializeApp() {
+  // Generate or retrieve Order Number - now async
+  await generateOrderNumber(false); // false means don't force new number
 
   // Set default dates
   setDefaultDates();
@@ -34,9 +35,9 @@ function initializeApp() {
   }
 }
 
-// Generate unique order number
-function generateOrderNumber(forceNew = true) {
-  // Check if we should use existing order number
+// Generate unique order number - UPDATED TO PERSIST ACROSS SESSIONS AND DEVICES
+async function generateOrderNumber(forceNew = true) {
+  // Check if we should use existing order number (for current session)
   if (!forceNew) {
     const existingOrderNumber = sessionStorage.getItem("currentOrderNumber");
     if (existingOrderNumber) {
@@ -45,18 +46,68 @@ function generateOrderNumber(forceNew = true) {
     }
   }
 
-  // Generate new order number
-  let counter = parseInt(sessionStorage.getItem("orderCounter") || "0");
+  let counter = 0;
+
+  try {
+    // Fetch the last order number from Google Sheets using your API
+    const response = await window.getAllOrders();
+
+    if (
+      response &&
+      response.status === "success" &&
+      response.orders &&
+      response.orders.length > 0
+    ) {
+      // Orders are returned with the newest first
+      const lastOrder = response.orders[0];
+      if (lastOrder && lastOrder.orderNumber) {
+        // Extract the number from format "ORD-0001"
+        const match = lastOrder.orderNumber.match(/ORD-(\d+)/);
+        if (match) {
+          counter = parseInt(match[1]);
+          console.log(
+            "Last order number from database:",
+            lastOrder.orderNumber,
+            "Counter:",
+            counter
+          );
+        }
+      }
+    } else {
+      console.log("No orders found in database, starting from 0");
+    }
+  } catch (error) {
+    console.error("Error fetching last order number from database:", error);
+    // Fallback to localStorage if API fails
+    const savedCounter = localStorage.getItem("orderCounter");
+    if (savedCounter) {
+      counter = parseInt(savedCounter);
+      console.log("Using localStorage fallback counter:", counter);
+    }
+  }
+
+  // Increment counter for new order
   counter++;
   if (counter > 9999) {
     counter = 1;
   }
-  sessionStorage.setItem("orderCounter", counter.toString());
+
+  // Save to localStorage as backup
+  localStorage.setItem("orderCounter", counter.toString());
+
+  // Format order number
   const orderNumber = `ORD-${String(counter).padStart(4, "0")}`;
 
-  // Store the current order number
+  // Store the current order number in session
   sessionStorage.setItem("currentOrderNumber", orderNumber);
-  document.getElementById("orderNumber").textContent = orderNumber;
+
+  // Update display
+  const orderElement = document.getElementById("orderNumber");
+  if (orderElement) {
+    orderElement.textContent = orderNumber;
+  }
+
+  console.log("Generated new order number:", orderNumber);
   return orderNumber;
 }
 
@@ -147,30 +198,9 @@ function calculateRemaining() {
   }
 }
 
-// function updateNavigationButtons() {
-//   const prevBtn = document.getElementById("prevBtn");
-//   const nextBtn = document.getElementById("nextBtn");
-//   const submitBtn = document.getElementById("submitBtn");
-
-//   // Show/hide previous button
-
-//   // Show/hide next/submit buttons
-//   if (currentStep === totalSteps) {
-//     nextBtn.style.display = "none";
-//     submitBtn.style.display = "flex";
-//   } else {
-//     nextBtn.style.display = "flex";
-//     submitBtn.style.display = "none";
-//   }
-// }
-
-// Validate current step
-
 // Handle form submission
 async function handleFormSubmit(e) {
   e.preventDefault();
-
-  //   if (!validateStep(currentStep)) return;
 
   const submitBtn = document.getElementById("submitBtn");
   const originalText = submitBtn.innerHTML;
@@ -185,6 +215,16 @@ async function handleFormSubmit(e) {
     // Save to Google Sheets
     const response = await saveToGoogleSheets(formData);
 
+    // Update the stored counter after successful save
+    const orderNumber = formData.orderNumber;
+    if (orderNumber) {
+      const match = orderNumber.match(/ORD-(\d+)/);
+      if (match) {
+        const counter = parseInt(match[1]);
+        localStorage.setItem("orderCounter", counter.toString());
+      }
+    }
+
     // Generate receipt
     generateReceipt(formData);
 
@@ -197,14 +237,12 @@ async function handleFormSubmit(e) {
     showNotification(getTranslation("orderSaved"), "success");
 
     // Clear the current order number from session storage
-    // This will ensure a new number is generated for the next order
     sessionStorage.removeItem("currentOrderNumber");
 
-    // DON'T generate new order number here - wait for user action
-    // The new number will be generated when:
-    // 1. User clicks "New Order" button
-    // 2. User refreshes the page
-    // 3. User navigates away and comes back
+    // Clear API cache to ensure fresh data next time
+    if (window.clearAPICache) {
+      window.clearAPICache();
+    }
   } catch (error) {
     console.error("Error saving order:", error);
     showNotification(getTranslation("errorSaving"), "error");
@@ -513,234 +551,25 @@ async function sendNotifications(data) {
   );
 }
 
-// New Order
-function newOrder() {
+// New Order - UPDATED to be async
+async function newOrder() {
   // Reset form
   document.getElementById("tailorForm").reset();
 
+  // Clear API cache to get fresh data
+  if (window.clearAPICache) {
+    window.clearAPICache();
+  }
+
   // Generate new order number only when creating a new order
-  generateOrderNumber(true); // true means force new number
+  await generateOrderNumber(true); // true means force new number
   setDefaultDates();
 
   // Hide receipt modal
   document.getElementById("receiptModal").classList.remove("show");
 
-  // Update navigation buttons
-  // updateNavigationButtons();
-
   scrollToTop();
 }
-
-//   addd--__-------------__--------------------
-//   --__-------------__--------------------
-// Print Receipt - Fixed to prevent duplicate windows
-// Print Receipt - Fixed to prevent duplicate windows and set proper filename
-// let isPrinting = false; // Flag to prevent duplicate print calls
-
-// function printReceipt() {
-//   // Prevent duplicate print calls
-//   if (isPrinting) {
-//     return;
-//   }
-//   isPrinting = true;
-
-//   const receiptContent = document.getElementById("receipt");
-//   if (!receiptContent) {
-//     console.error("Element with ID 'receipt' not found.");
-//     isPrinting = false;
-//     return;
-//   }
-
-//   // Get order number for filename - try multiple selectors
-//   let orderNumber = "";
-
-//   // Try to get from the receipt content first
-//   const orderNumberElement = receiptContent.querySelector(".badge-number");
-//   if (orderNumberElement) {
-//     orderNumber = orderNumberElement.textContent.trim();
-//   }
-
-//   // If not found, try to get from formData
-//   if (!orderNumber && window.formData && window.formData.orderNumber) {
-//     orderNumber = window.formData.orderNumber;
-//   }
-
-//   // If still not found, try to get from the main page
-//   if (!orderNumber) {
-//     const mainOrderElement = document.getElementById("orderNumber");
-//     if (mainOrderElement) {
-//       orderNumber = mainOrderElement.textContent.trim();
-//     }
-//   }
-
-//   // Default to "Receipt" if order number not found
-//   orderNumber = orderNumber || "Receipt";
-
-//   // Create offscreen iframe
-//   const iframe = document.createElement("iframe");
-//   iframe.style.position = "absolute";
-//   iframe.style.width = "0";
-//   iframe.style.height = "0";
-//   iframe.style.border = "0";
-//   iframe.style.left = "-9999px";
-
-//   // Set the iframe name attribute (some browsers use this for PDF filename)
-//   iframe.name = orderNumber;
-
-//   document.body.appendChild(iframe);
-
-//   const win = iframe.contentWindow;
-//   const doc = win.document;
-
-//   // Get all necessary resources
-//   const cssLink = document.querySelector('link[href*="receipt.css"]');
-//   const cssHref = cssLink
-//     ? cssLink.href
-//     : `${window.location.origin}/css/receipt.css`;
-
-//   // Check for Font Awesome
-//   const fontAwesomeLink = document.querySelector(
-//     'link[href*="fontawesome"], link[href*="font-awesome"], link[href*="fa"]'
-//   );
-//   const fontAwesomeHref = fontAwesomeLink
-//     ? fontAwesomeLink.href
-//     : "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css";
-
-//   // Check for Google Fonts (Inter)
-//   const interFontHref =
-//     "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
-
-//   // Build the document with proper title
-//   doc.open();
-//   doc.write(`<!DOCTYPE html>
-// <html>
-// <head>
-//     <meta charset="UTF-8">
-//     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//     <title>${orderNumber}</title>
-//     <link rel="preconnect" href="https://fonts.googleapis.com">
-//     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-//     <link href="${interFontHref}" rel="stylesheet">
-//     <link rel="stylesheet" href="${fontAwesomeHref}">
-//     <link rel="stylesheet" href="${cssHref}">
-//     <style>
-//       @page { size: A4; margin: 10mm; }
-//       @media print {
-//         body { margin: 0; }
-//       }
-//     </style>
-// </head>
-// <body>
-//     ${receiptContent.outerHTML}
-// </body>
-// </html>`);
-//   doc.close();
-
-//   // Set document title again after content is written (for some browsers)
-//   if (doc.title !== orderNumber) {
-//     doc.title = orderNumber;
-//   }
-
-//   // Enhanced cleanup
-//   function cleanup() {
-//     setTimeout(() => {
-//       if (iframe && iframe.parentNode) {
-//         document.body.removeChild(iframe);
-//       }
-//       isPrinting = false; // Reset the flag
-//     }, 100);
-//   }
-
-//   // Print execution with proper timing
-//   function executePrint() {
-//     try {
-//       // Ensure title is set one more time before printing
-//       if (win.document.title !== orderNumber) {
-//         win.document.title = orderNumber;
-//       }
-
-//       win.focus();
-
-//       // Handle print completion
-//       if (win.matchMedia) {
-//         const mediaQueryList = win.matchMedia("print");
-//         mediaQueryList.addListener(function (mql) {
-//           if (!mql.matches) {
-//             cleanup();
-//           }
-//         });
-//       }
-
-//       win.onafterprint = cleanup;
-
-//       // Small delay to ensure title is recognized
-//       setTimeout(() => {
-//         win.print();
-//       }, 50);
-//     } catch (err) {
-//       console.error("Print error:", err);
-//       cleanup();
-//     }
-//   }
-
-//   // Wait for all resources to load
-//   let resourcesLoaded = 0;
-//   const totalResources = 3; // CSS, Font Awesome, Google Fonts
-//   let hasExecuted = false; // Prevent multiple executions
-
-//   function checkResourcesAndPrint() {
-//     if (hasExecuted) return;
-
-//     resourcesLoaded++;
-//     if (resourcesLoaded >= totalResources) {
-//       hasExecuted = true;
-//       // All resources loaded, wait a bit for rendering
-//       setTimeout(executePrint, 300);
-//     }
-//   }
-
-//   // Monitor CSS loading
-//   const checkCSS = setInterval(() => {
-//     if (hasExecuted) {
-//       clearInterval(checkCSS);
-//       return;
-//     }
-
-//     try {
-//       const testEl = doc.body.querySelector(".modern-receipt-container");
-//       if (testEl) {
-//         const styles = win.getComputedStyle(testEl);
-//         if (styles.fontFamily.includes("Inter")) {
-//           clearInterval(checkCSS);
-//           checkResourcesAndPrint();
-//         }
-//       }
-//     } catch (e) {}
-//   }, 50);
-
-//   // Timeout fallback
-//   setTimeout(() => {
-//     clearInterval(checkCSS);
-//     if (!hasExecuted && iframe.parentNode) {
-//       hasExecuted = true;
-//       executePrint();
-//     }
-//   }, 3000);
-
-//   // Monitor iframe load - use addEventListener instead of onload
-//   iframe.addEventListener("load", () => {
-//     if (!hasExecuted) {
-//       checkResourcesAndPrint();
-//     }
-//   });
-
-//   // Monitor window load
-//   win.addEventListener("load", () => {
-//     if (!hasExecuted) {
-//       checkResourcesAndPrint();
-//     }
-//   });
-// }
 
 // Print Receipt - Fixed to use ORDER NUMBER (not receipt ID) for filename
 let isPrinting = false; // Flag to prevent duplicate print calls
@@ -995,8 +824,6 @@ function printReceipt() {
   });
 }
 
-//---------------------------------------------------------------------------
-
 // Show notification
 function showNotification(message, type = "info") {
   const notification = document.createElement("div");
@@ -1051,8 +878,6 @@ function scrollToTop() {
 }
 
 // Export functions for global use
-// window.nextStep = nextStep;
-// window.previousStep = previousStep;
 window.loadLastMeasurements = loadLastMeasurements;
 window.openWhatsApp = openWhatsApp;
 window.sendWhatsApp = sendWhatsApp;
