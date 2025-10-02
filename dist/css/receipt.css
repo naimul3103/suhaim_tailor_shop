@@ -130,7 +130,7 @@
 .info-value {
   font-size: 16px;
   color: #000;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 /* Receipt Body */
@@ -192,17 +192,17 @@
   padding: 8px 10px;
   background: #f8f9fa;
   border-radius: 4px;
-  font-size: 16px;
+  font-size: 12px;
 }
 
-/* .item-label {
+.item-label {
   color: #666;
-} */
+}
 
 .item-value {
   font-weight: 600;
   color: #000;
-  font-size: 20px;
+  font-size: 12px;
 }
 
 /* Data List for Design */
@@ -245,7 +245,7 @@
 /* Notes */
 .notes-text {
   font-size: 12px;
-  color: #666;
+  color: black;
   /* line-height: 1.5; */
   padding: 10px;
   background: var(--gray-100);
@@ -270,7 +270,7 @@
 }
 
 .delivery-date {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: #000;
   margin-bottom: 5px;

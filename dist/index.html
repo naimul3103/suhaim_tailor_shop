@@ -184,7 +184,7 @@
           </div>
         </div>
 
-        <!-- Step 2: Measurements -->
+        <!-- Step 2: Measurements - UPDATED TO USE TEXT INPUTS -->
         <div class="form-step active" data-step="2">
           <div class="section-card">
             <div class="section-header">
@@ -201,100 +201,66 @@
                 <span data-lang="loadPrevious">Load Previous</span>
               </button>
             </div>
+            <p style="margin: 10px 0; color: #666; font-size: 14px">
+              <i class="fas fa-info-circle"></i>
+              <span data-lang="measurementHelp"
+                >(e.g., "42.5 + 2" or "42.5, loose")
+              </span>
+            </p>
             <div class="measurements-grid">
               <!-- Length -->
               <div class="measurement-item">
                 <label data-lang="length">Length</label>
-                <input
-                  type="number"
-                  name="length"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="length" class="form-control" />
                 <span class="unit">cm</span>
               </div>
               <!-- Shoulder -->
               <div class="measurement-item">
                 <label data-lang="shoulder">Shoulder</label>
-                <input
-                  type="number"
-                  name="shoulder"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="shoulder" class="form-control" />
                 <span class="unit">cm</span>
               </div>
               <!-- Sleeve length -->
               <div class="measurement-item">
                 <label data-lang="sleeveLength">Sleeve Length</label>
-                <input
-                  type="number"
-                  name="sleeveLength"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="sleeveLength" class="form-control" />
                 <span class="unit">cm</span>
               </div>
               <!-- Neck -->
               <div class="measurement-item">
                 <label data-lang="neck">Neck</label>
-                <input
-                  type="number"
-                  name="neck"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="neck" class="form-control" />
                 <span class="unit">cm</span>
               </div>
               <!-- Chest width -->
               <div class="measurement-item">
                 <label data-lang="chestWidth">Chest Width</label>
-                <input
-                  type="number"
-                  name="chestWidth"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="chestWidth" class="form-control" />
                 <span class="unit">cm</span>
               </div>
               <!-- Sleeve Width -->
               <div class="measurement-item">
                 <label data-lang="sleeveWidth">Sleeve Width</label>
-                <input
-                  type="number"
-                  name="sleeveWidth"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="sleeveWidth" class="form-control" />
                 <span class="unit">cm</span>
               </div>
               <!-- Hand Width -->
               <div class="measurement-item">
                 <label data-lang="handWidth">Hand Width</label>
-                <input
-                  type="number"
-                  name="handWidth"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="handWidth" class="form-control" />
                 <span class="unit">cm</span>
               </div>
               <!-- Cuff Length -->
               <div class="measurement-item">
                 <label data-lang="cuffLength">Cuff Length</label>
-                <input
-                  type="number"
-                  name="cuffLength"
-                  step="0.01"
-                  class="form-control"
-                />
+                <input type="text" name="cuffLength" class="form-control" />
                 <span class="unit">cm</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Step 3: Design Options (Compact) -->
+        <!-- Step 3: Design Options (Compact) - REMAINS SAME -->
         <div class="form-step active" data-step="3">
           <div class="section-card">
             <div class="section-header">
@@ -746,7 +712,7 @@
           </div>
         </div>
 
-        <!-- Step 4: Payment & Notes -->
+        <!-- Step 4: Payment & Notes - REMAINS SAME -->
         <div class="form-step active" data-step="4">
           <div class="section-card">
             <div class="section-header">
