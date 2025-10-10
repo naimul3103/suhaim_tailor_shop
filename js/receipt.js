@@ -574,7 +574,7 @@ function getText(key, lang = "en") {
       doubleStitch: "ডাবল সেলাই",
       hiddenStitch: "লুকানো সেলাই",
 
-      embroidery: "সূচিকর্ম",
+      embroidery: "এম্ব্রয়ডারি",
       specialRequest: "বিশেষ অনুরোধ",
     },
   };
