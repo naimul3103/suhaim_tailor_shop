@@ -289,8 +289,7 @@ function collectFormData() {
     // Additional Options
     stitchDouble: form.stitchDouble.checked ? "Yes" : "No",
     stitchHidden: form.stitchHidden.checked ? "Yes" : "No",
-    tailorTail: form.tailorTail.checked ? "Yes" : "No",
-    jacket: form.jacket.checked ? "Yes" : "No",
+
     embroidery: form.embroidery.checked ? "Yes" : "No",
     specialRequest: form.specialRequest.checked ? "Yes" : "No",
 
@@ -406,8 +405,7 @@ async function loadLastMeasurements() {
       const checkboxFields = [
         "stitchDouble",
         "stitchHidden",
-        "tailorTail",
-        "jacket",
+
         "embroidery",
         "specialRequest",
       ];

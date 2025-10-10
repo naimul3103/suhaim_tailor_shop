@@ -90,8 +90,7 @@ const translations = {
     additionalOptions: "Additional Options",
     doubleStitch: "Double Stitch",
     hiddenStitch: "Hidden Stitch",
-    tailorTail: "Tailor's Tail",
-    jacket: "Jacket",
+
     embroidery: "Embroidery",
     specialRequest: "Special Request",
 
@@ -248,9 +247,7 @@ const translations = {
     additionalOptions: "خيارات إضافية",
     doubleStitch: "خياطة مزدوجة",
     hiddenStitch: "خياطة مخفية",
-    tailorTail: "ذيل خياط",
-    jacket: "جاكيت",
-    embroidery: "تطريز",
+
     specialRequest: "طلب خاص",
 
     // Fabric Details
@@ -407,8 +404,7 @@ const translations = {
     additionalOptions: "অতিরিক্ত অপশন",
     doubleStitch: "ডাবল সেলাই",
     hiddenStitch: "লুকানো সেলাই",
-    tailorTail: "টেইলার টেইল",
-    jacket: "জ্যাকেট",
+
     embroidery: "এমব্রয়ডারি",
     specialRequest: "বিশেষ অনুরোধ",
 

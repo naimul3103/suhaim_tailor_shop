@@ -401,8 +401,7 @@ function generateMinimalAdditional(data, lang) {
   const options = [];
   if (data.stitchDouble === "Yes") options.push(getText("doubleStitch", lang));
   if (data.stitchHidden === "Yes") options.push(getText("hiddenStitch", lang));
-  if (data.tailorTail === "Yes") options.push(getText("tailorTail", lang));
-  if (data.jacket === "Yes") options.push(getText("jacket", lang));
+
   if (data.embroidery === "Yes") options.push(getText("embroidery", lang));
   if (data.specialRequest === "Yes")
     options.push(getText("specialRequest", lang));
@@ -473,9 +472,7 @@ function getText(key, lang = "en") {
       // Additional
       doubleStitch: "Double Stitch",
       hiddenStitch: "Hidden Stitch",
-      tailorTail: "Tailor Tail",
-      jacket: "Jacket",
-      embroidery: "Embroidery",
+
       specialRequest: "Special Request",
     },
     ar: {
@@ -525,8 +522,7 @@ function getText(key, lang = "en") {
       // Additional
       doubleStitch: "خياطة مزدوجة",
       hiddenStitch: "خياطة مخفية",
-      tailorTail: "ذيل الخياط",
-      jacket: "جاكيت",
+
       embroidery: "تطريز",
       specialRequest: "طلب خاص",
     },
@@ -577,8 +573,7 @@ function getText(key, lang = "en") {
       // Additional
       doubleStitch: "ডাবল সেলাই",
       hiddenStitch: "লুকানো সেলাই",
-      tailorTail: "টেইলর টেইল",
-      jacket: "জ্যাকেট",
+
       embroidery: "সূচিকর্ম",
       specialRequest: "বিশেষ অনুরোধ",
     },
